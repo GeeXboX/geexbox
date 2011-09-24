@@ -1,0 +1,22 @@
+TODO for 2.0.1 release:
+~~~~~~~~~~~~~~~~~~~~~~~
+
+- add missing wifi firmwares package
+- add upgrade repo configuration
+- add xbmc package update/check utility
+- fix audio-mixer for broken audio devices
+- add package for nvidia-legacy driver
+- enable EFI framebuffer
+- add fixes to ease hdd install
+- fix pandaboard sound issue
+- fix pandaboard analog audio playback
+- fix audio and reoslution auto-detect on tegra2
+- add script to automate panda/tegra2 sdcard creation
+- make omap3 build work again
+- add-on for xbmc to change network settings
+- add syslinux support for Macintosh in isohybrid images.
+- fix eject issue on boot from CD
+- add missing Asian fonts (extra package)
+- add ATI/AMD proprietary drivers
+- add ATI/AMD GPU acceleration thorugh XvBA
+
