@@ -1,3 +1,33 @@
+xxxx-xx-xx  Benjamin Zores <ben@geexbox.org>
+
+        * bug-fix release version 2.0.1
+
+	- System:
+	 + Restored HDD installation setup (now supports both i386 and x86_64).
+	 + Fixed eject issue when booting from CD.
+	 + Xorg Server v1.10.4.
+
+	- Audio Drivers:
+	 + Fixed some broken audio devices audio mixer.
+	 + Fixed Tegra2 audio support.
+
+	- Video Drivers:
+	 + Fixed Tegra2 HDMI resolution auto-detection.
+	 + Support for EFI framebuffer.
+	 + Support for ATI/AMD proprietary drivers.
+	 + Support for ATI/AMD GPU acceleration through VA-API/XvBA.
+	 + Support for nVidia legacy GPUs.
+
+	- Input:
+	 + Restored support for some LIRC-compatible devices.
+
+	- Networking Features:
+	 + Added some missing WiFi cards firmwares.
+
+        - MediaCenter:
+	 + Added system's packages check/updater graphical utility.
+	 + Added network settings configuration graphical utility.
+
 2011-09-17  Benjamin Zores <ben@geexbox.org>
 
         * release version 2.0, codename "Love It or Shove It"
