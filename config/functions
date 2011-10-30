@@ -451,7 +451,7 @@ do_autoconf () {
   ACLOCAL_INCLUDES=""
   [ -d m4 ] && ACLOCAL_INCLUDES="-I m4"
 
-  $AUTORECONF -i -f \
+  $AUTORECONF -i -f -v \
     -I $ROOT/$TOOLCHAIN/share/aclocal \
     -I $ROOT/$TOOLCHAIN/share/aclocal-1.11 \
     $ACLOCAL_INCLUDES
