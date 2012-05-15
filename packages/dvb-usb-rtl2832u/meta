@@ -1,6 +1,8 @@
 PKG_NAME=dvb-usb-rtl2832u
-PKG_VERSION=1.4.2
-PKG_URL="$DISTRO_SRCS/dvb-usb-rtl2832u-${PKG_VERSION}.tar.bz2"
+PKG_URL_REV=fec6115935
+PKG_VERSION=2.2.2+${PKG_URL_REV}
+PKG_URL_PROTO=git
+PKG_URL="git://github.com/ambrosa/DVB-Realtek-RTL2832U-2.2.2-10tuner-mod_kernel-3.0.0.git"
 PKG_REV=1
 PKG_DEPENDS="$TARGET_LIBC"
 PKG_BUILD_DEPENDS="toolchain"

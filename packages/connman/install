@@ -10,7 +10,10 @@ do_install usr/lib/connman/scripts
 do_install lib/systemd
 do_install etc
 cp $ROOT/$PACKAGES/$1/config/network $INSTALL/etc
+cp $ROOT/$PACKAGES/$1/config/network-backend $INSTALL/etc
 cp $ROOT/$PACKAGES/$1/scripts/connman-parse-configuration $INSTALL/usr/lib/connman
+cp $ROOT/$PACKAGES/$1/scripts/net-udhcpc $INSTALL/usr/sbin
+cp $ROOT/$PACKAGES/$1/scripts/gen-resolv $INSTALL/usr/sbin
 
 NET=$INSTALL/etc/network
 [ -n "$TELNET_SERVER" ] && \
@@ -23,5 +26,5 @@ NET=$INSTALL/etc/network
   sed -i "s/^SAMBA_SERVER=.*/SAMBA_SERVER=\"$SAMBA_SERVER\"/" $NET
 
 cat > $INSTALL/etc/issue <<EOF
-Welcome to $DISTRONAME $TARGET_ARCH $DISTRO_VERSION (C) 2002-2011
+Welcome to $DISTRONAME $TARGET_ARCH $DISTRO_VERSION (C) 2002-2012
 EOF

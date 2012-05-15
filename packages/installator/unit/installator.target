@@ -1,0 +1,5 @@
+[Unit]
+Description=Installator
+Requires=basic.target
+Conflicts=rescue.service rescue.target
+AllowIsolate=yes

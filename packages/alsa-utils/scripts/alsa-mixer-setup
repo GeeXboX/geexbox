@@ -1,5 +1,11 @@
 #!/bin/sh
 
+. /etc/audio
+
+NOW=$(date +%Y%M%d%H%M)
+echo "Sound setup : begin $NOW" >> /tmp/debug-sound
+amixer -i >> /tmp/debug-sound
+
 [ ! -e /etc/asound.conf ] && echo "" > /etc/asound.conf
 
 mixer() {
@@ -103,14 +109,23 @@ fi
 # Required for PandaBoard
 if grep -q 'OMAP4 Panda board' /proc/cpuinfo; then
   echo "set _verb HiFi" | alsaucm -c SDP4430 -b -
+fi
 
-  # Check for analog or HDMI Output
-  if [ "$SOUNDCARD_MODE" = hdmi ]; then
-    echo "" >> /etc/asound.conf
-    echo "pcm.!default { type hw card 1 device 0 }" >> /etc/asound.conf
-  else
-    sed -i 's%pcm.*default.*%%' >> /etc/asound.conf
-  fi
+# Check for analog or HDMI Output
+if [ "$SOUNDCARD_MODE" = hdmi ]; then
+  a=`aplay -l | grep HDMI`
+  CARD_HDMI=`echo $a | cut -d: -f1`
+  DEVICE_HDMI=`echo $a | cut -d: -f2 | cut -d, -f2`
+  echo "" > /etc/asound.conf
+  echo "pcm.!default { type hw $CARD_HDMI $DEVICE_HDMI }" >> /etc/asound.conf
+else
+  sed -i 's%pcm.*default.*%%' /etc/asound.conf
+fi
+
+# Required for Toshiba AC100 / Dyanbook AZ
+if grep -q 'Toshiba AC100' /proc/cpuinfo; then
+  # enable internal speakers
+  mixer 'SpeakerOut Mux' 'HPOut Mix'
 fi
 
 # set digital output mixer params
@@ -133,5 +148,25 @@ else
   mixer 'Analog Rear' 90%
   mixer 'Analog Center/LFE' 90%
 fi
+
+# Required for HP Pavilion dv7 Notebook
+mixer Speaker 90% unmute
+
+# Required for Toshiba Satellite A60
+if dmesg | grep -q "TOSHIB Satellite A60/Portable PC" ; then
+  mixer ‘External Amplifier’ 90% unmute
+fi
+
+echo "Config :" >> /tmp/debug-sound
+echo "ALSA_CARD= $ALSA_CARD" >> /tmp/debug-sound
+echo "SOUNDCARD_MODE= $SOUNDCARD_MODE" >> /tmp/debug-sound
+echo "SOUNDCARD_PT_MODE= $SOUNDCARD_PT_MODE" >> /tmp/debug-sound
+echo "AC97_SPSA= $AC97_SPSA" >> /tmp/debug-sound
+echo "CHANNELS= $CHANNELS" >> /tmp/debug-sound
+echo "SBL_AUDIGY= $SBL_AUDIGY" >> /tmp/debug-sound
+echo "new configuration"
+amixer -i >> /tmp/debug-sound
+[ -f /usr/bin/aplay ] && aplay -l >>/tmp/debug-sound
+echo "Sound setup : stop" >> /tmp/debug-sound
 
 exit 0

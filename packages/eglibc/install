@@ -12,3 +12,5 @@ do_install usr/bin/locale
 
 mkdir -p $INSTALL/etc
 cp $ROOT/$PACKAGES/$1/config/nsswitch.conf $INSTALL/etc
+
+exit 0

@@ -1,8 +1,11 @@
 #
-# Snowball Linaro kernel
+# Snowball Igloo kernel
 #
+# http://www.igloocommunity.org/gitweb/?p=kernel/igloo-kernel.git;a=shortlog;h=refs/heads/stable-ubuntu-ux500-3.3-1
 
-PKG_URL_REV=ab2348a541
-PKG_VERSION=2.6.38-ux500-r${PKG_URL_REV}
+PKG_URL_REV=66abcc2e0346
+PKG_VERSION=3.3-0-ubuntu-2012.04+${PKG_URL_REV}
 PKG_URL_PROTO=git
-PKG_URL="git://git.linaro.org/bsp/st-ericsson/linux-2.6.38-ux500.git"
+PKG_URL="git://igloocommunity.org/git/kernel/igloo-kernel.git"
+
+PKG_BUILD_DEPENDS="toolchain uboot-mkimage"

@@ -1,19 +1,18 @@
 PKG_NAME=gdb
 case "$TOOLCHAIN_TYPE" in
   openbricks)
-    PKG_VERSION=7.2
+    PKG_VERSION=7.4.1
     PKG_URL="http://ftp.gnu.org/gnu/gdb/gdb-${PKG_VERSION}.tar.bz2"
     ;;
   linaro)
-    PKG_VERSION=7.2-2011.05-0
-    PKG_URL="http://launchpad.net/gdb-linaro/7.2/$PKG_VERSION/+download/gdb-linaro-$PKG_VERSION.tar.bz2"
+    PKG_VERSION=7.4-2012.04
+    PKG_URL="http://launchpad.net/gdb-linaro/7.4/$PKG_VERSION/+download/gdb-linaro-$PKG_VERSION.tar.bz2"
 esac
 PKG_REV=1
 PKG_RUN_DEPENDS="$TARGET_LIBC ncurses"
 PKG_BUILD_DEPENDS="toolchain ncurses"
-PKG_USE="uclibc eglibc glibc"
+PKG_USE="uclibc eglibc"
 PKG_RUN_DEPENDS_uclibc=uclibc-gdb
-PKG_RUN_DEPENDS_glibc=glibc-gdb
 PKG_RUN_DEPENDS_eglibc=eglibc-gdb
 PKG_PRIORITY=optional
 PKG_SECTION=utils

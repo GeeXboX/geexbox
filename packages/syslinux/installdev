@@ -8,6 +8,8 @@ do_installdev usr/share/syslinux/ldlinux.sys toolchain
 do_installdev usr/share/syslinux/ldlinux.bss toolchain
 do_installdev usr/share/syslinux/mbr.bin toolchain
 do_installdev usr/share/syslinux/gptmbr.bin toolchain
+do_installdev usr/share/syslinux/isohdpfx*.bin toolchain
+do_installdev usr/share/syslinux/isohdppx*.bin toolchain
 do_installdev boot toolchain
 
 # ISOLINUX
@@ -21,7 +23,7 @@ else
 fi
 
 if [ "$INSTALLATOR" = "yes" ]; then
-  [ "$TARGET_ARCH" = i386 ] && INS_PARAMS="^#INS#" || INS_PARAMS="^#INS#.*"
+  [ "$TARGET_ARCH" = i386 -o "$TARGET_ARCH" = x86_64 ] && INS_PARAMS="^#INS#" || INS_PARAMS="^#INS#.*"
   sed -i s%$INS_PARAMS%% $ISOLINUX_DIR/isolinux.cfg
 fi
 if [ "$CONFIGURATOR" = "yes" ]; then
@@ -37,9 +39,3 @@ sed -i s%release-nr%$DISTRO_VERSION% $ISOLINUX_DIR/isolinux.cfg
 # PXELINUX
 mkdir -p $INSTALL/boot/pxelinux.cfg
 cp $ISOLINUX_DIR/isolinux.cfg $INSTALL/boot/pxelinux.cfg/default
-
-mkdir -p $INSTALL/bin
-cp -P extlinux/extlinux $INSTALL/bin
-cp -P utils/isohybrid $INSTALL/bin
-
-exit 0

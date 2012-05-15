@@ -14,6 +14,10 @@ case "$GLES_PROVIDER" in
     ;;
   tegra)
     PKG_BUILD_DEPENDS="tegra-gl" ;;
-  imx)
-    PKG_BUILD_DEPENDS="imx-graphics" ;;
+  imx5)
+    PKG_BUILD_DEPENDS="imx5-graphics" ;;
+  imx6)
+    PKG_BUILD_DEPENDS="imx6-graphics" ;;
+  mali)
+    PKG_BUILD_DEPENDS="mali400" ;;
 esac

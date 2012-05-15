@@ -8,9 +8,28 @@ TLS_CONFIG="--enable-tls"
 [ $TARGET_LIBC = "uclibc" ] && TLS_CONFIG="--disable-tls"
 
 cd $BUILD/$1*
-do_configure \
+
+mkdir -p objdir-host
+cd objdir-host
+setup_toolchain host
+do_configure host \
             --without-ncurses \
+            --disable-tls \
+            --disable-wall \
+
+make
+make_install toolchain
+rm -f .install/usr/lib/lib*.so
+cd ..
+
+mkdir -p objdir-target
+cd objdir-target
+setup_toolchain target
+do_configure target \
+            --without-ncurses \
+            --disable-wall \
             $TLS_CONFIG \
 
 make
 make_install
+cd ..

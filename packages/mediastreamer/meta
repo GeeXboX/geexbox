@@ -1,0 +1,13 @@
+PKG_NAME=mediastreamer
+PKG_VERSION=2.8.2
+PKG_URL="http://mirror.lihnidos.org/GNU/savannah/linphone/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+PKG_REV=1
+PKG_USE="pulseaudio alsa"
+PKG_DEPENDS="ortp ffmpeg v4l-utils speex"
+PKG_DEPENDS_pulseaudio="pulseaudio"
+PKG_DEPENDS_alsa="alsa-lib"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_PRIORITY=optional
+PKG_SECTION=libs
+PKG_SHORTDESC="mediastreamer2 telephony streaming engine"
+PKG_LONGDESC="Mediastreamer2 is a powerful and lightweighted streaming engine specialized for voice/video telephony applications."

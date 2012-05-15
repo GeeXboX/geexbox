@@ -32,7 +32,7 @@ else
    EXTRA_CONFIG="--disable-dvdread --disable-dvdnav"
 fi
 
-if pkg_uses $1 live555; then
+if pkg_uses $1 live; then
   EXTRA_LIBDIR="$EXTRA_LIBDIR -L$LIB_PREFIX/live"
   EXTRA_INCDIR="$EXTRA_INCDIR -I$LIB_PREFIX/live"
 else
@@ -50,6 +50,8 @@ esac
 if pkg_uses $1 vdpau; then
   EXTRA_LIBS="$EXTRA_LIBS -lvdpau"
 fi
+
+[ "$TARGET_ARCH" = i386 -o "$TARGET_ARCH" = x86_64 -o "$TARGET_ARCH" = arm ] && EXTRA_LIBS="$EXTRA_LIBS -lfontconfig"
 
 if [ "$TARGET_ARCH" = arm ]; then
   VORBIS_CONFIG="--disable-libvorbis \
@@ -75,6 +77,17 @@ export CFLAGS="$CFLAGS -ffast-math -DFIXED_POINT"
 
 cd $BUILD/$1*
 #rm -rf libavcodec # ensure we check for headers in external ffmpeg
+
+LIBAV="--enable-libavcodec_so --enable-libavformat_so --enable-libavutil_so --enable-libpostproc_so --enable-libswscale_so"
+
+if [ "$TARGET_ARCH" = arm ] ; then
+  for f in ftree-loop-distribution \
+         floop-interchange floop-strip-mine floop-block; do
+    CFLAGS=$(echo $CFLAGS | sed -e "s%-$f%%")
+    CXXFLAGS=$(echo $CXXFLAGS | sed -e "s%-$f%%")
+  done
+fi
+
 ./configure --prefix=/usr \
             --confdir=/etc/mplayer \
             --extra-ldflags="$EXTRA_LIBDIR" \
@@ -120,16 +133,7 @@ cd $BUILD/$1*
             --disable-xvid \
             --disable-x264 \
             --disable-demuxer=matroska \
-            --enable-libavcodec_so \
-            --enable-libavformat_so \
-            --enable-libavutil_so \
-            --enable-libpostproc_so \
-            --enable-libswscale_so \
-            --disable-libavcodec_a \
-            --disable-libavformat_a \
-            --disable-libavutil_a \
-            --disable-libpostproc_a \
-            --disable-libswscale_a \
+            $LIBAV \
             --disable-speex \
             $VORBIS_CONFIG \
             --enable-theora \

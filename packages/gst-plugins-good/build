@@ -23,6 +23,7 @@ fi
 export LIBS="-L$SYSROOT_PREFIX/usr/lib"
 
 cd $BUILD/$1*
+do_autoconf
 do_configure \
             --disable-nls \
             --disable-rpath \
@@ -44,7 +45,7 @@ do_configure \
             --enable-equalizer \
             --enable-flv \
             --enable-id3demux \
-            --disable-icydemux \
+            --enable-icydemux \
             --enable-interleave \
             --enable-flx \
             --disable-goom \

@@ -28,10 +28,20 @@ config EGL_PROVIDER_TEGRA
   depends on ( TAINT && TARGET_PLATFORM_arm_tegra2 )
   select PKG_tegra-gl
 
-config EGL_PROVIDER_IMX
-  bool \"Freescale i.MX (AMD/ATI z160)\"
+config EGL_PROVIDER_IMX5
+  bool \"Freescale i.MX5 (AMD/ATI z160)\"
   depends on ( TAINT && TARGET_PLATFORM_arm_imx5x )
-  select PKG_imx-graphics
+  select PKG_imx5-graphics
+
+config EGL_PROVIDER_IMX6
+  bool \"Freescale i.MX6 (Vivante GC400)\"
+  depends on ( TAINT && TARGET_PLATFORM_arm_imx6 )
+  select PKG_imx6-graphics
+
+config EGL_PROVIDER_MALI
+  bool \"Mali 400\"
+  depends on ( TAINT && TARGET_PLATFORM_arm_ux500 )
+  select PKG_mali400
 
 endchoice
 
@@ -56,10 +66,20 @@ config GLES_PROVIDER_TEGRA
   depends on ( TAINT && TARGET_PLATFORM_arm_tegra2 )
   select PKG_tegra-gl
 
-config GLES_PROVIDER_IMX
-  bool \"Freescale i.MX (AMD/ATI z160)\"
+config GLES_PROVIDER_IMX5
+  bool \"Freescale i.MX5 (AMD/ATI z160)\"
   depends on ( TAINT && TARGET_PLATFORM_arm_imx5x )
-  select PKG_imx-graphics
+  select PKG_imx5-graphics
+
+config GLES_PROVIDER_IMX6
+  bool \"Freescale i.MX6 (Vivante GC400)\"
+  depends on ( TAINT && TARGET_PLATFORM_arm_imx6 )
+  select PKG_imx6-graphics
+
+config GLES_PROVIDER_MALI
+  bool \"Mali 400\"
+  depends on ( TAINT && TARGET_PLATFORM_arm_ux500 )
+  select PKG_mali400
 
 endchoice
 
@@ -79,10 +99,20 @@ config OVG_PROVIDER_SGX
   select PKG_sgx530-OpenGLES if TARGET_PLATFORM_arm_omap3
   select PKG_sgx540-OpenGLES if TARGET_PLATFORM_arm_omap4
 
-config OVG_PROVIDER_IMX
-  bool \"Freescale i.MX (AMD/ATI z160)\"
+config OVG_PROVIDER_IMX5
+  bool \"Freescale i.MX5 (AMD/ATI z160)\"
   depends on ( TAINT && TARGET_PLATFORM_arm_imx5x )
-  select PKG_imx-graphics
+  select PKG_imx5-graphics
+
+config OVG_PROVIDER_IMX6
+  bool \"Freescale i.MX6 (Vivante GC400)\"
+  depends on ( TAINT && TARGET_PLATFORM_arm_imx6 )
+  select PKG_imx6-graphics
+
+config OVG_PROVIDER_MALI
+  bool \"Mali 400\"
+  depends on ( TAINT && TARGET_PLATFORM_arm_ux500 )
+  select PKG_mali400
 
 endchoice
 
@@ -121,6 +151,14 @@ PKG_USE_SECTION_DESC_toolkits="Applicative Toolkits"
 PKG_USE_NAME_aacs="Blu-Ray descrambling (AACS)"
 PKG_USE_SECTION_aacs="multimedia"
 PKG_USE_DEPENDS_aacs="libaacs"
+
+# afpclient
+PKG_USE_NAME_afpclient="Apple Filing Protocol (AFP)"
+PKG_USE_DEPENDS_afpclient="afpfs-ng"
+
+# airtunes
+PKG_USE_NAME_airtunes="Apple AirPort Express Emulation Streaming"
+PKG_USE_DEPENDS_airtunes="libshairport"
 
 # alsa
 PKG_USE_NAME_alsa="ALSA"
@@ -208,13 +246,21 @@ PKG_USE_SECTION_intel="gfxdrivers"
 PKG_USE_ARCH_intel="i386 x86_64"
 PKG_USE_DEPENDS_intel="xf86-video-intel"
 
+# libcec
+PKG_USE_NAME_libcec="HDMI-CEC"
+PKG_USE_DEPENDS_libcec="libcec"
+
+# libcec
+PKG_USE_NAME_libnfs="NFS"
+PKG_USE_DEPENDS_libnfs="libnfs"
+
 # lirc
 PKG_USE_NAME_lirc="LIRC"
 PKG_USE_SECTION_lirc="input"
 PKG_USE_DEPENDS_lirc="lirc"
 
-# live555
-PKG_USE_NAME_live555="LIVE555"
+# live
+PKG_USE_NAME_live="LIVE555"
 
 # mach64
 PKG_USE_NAME_mach64="ATI Mach64"
@@ -320,6 +366,10 @@ PKG_USE_PLATFORM_tidsp="omap3"
 PKG_USE_NAME_touchscreen="Touch Screen"
 PKG_USE_SECTION_touchscreen="input"
 
+# tvheadend
+PKG_USE_NAME_tvheadend="DVB/DVR/LiveTV"
+PKG_USE_DEPENDS_tvheadend="tvheadend"
+
 # unichrome
 PKG_USE_NAME_unichrome="VIA UniChrome"
 PKG_USE_SECTION_unichrome="gfxdrivers"
@@ -353,6 +403,11 @@ PKG_USE_DEPENDS_xine="xine-lib"
 PKG_USE_NAME_xorg="Xorg"
 PKG_USE_SECTION_xorg="display"
 PKG_USE_DEPENDS_xorg="Xorg"
+
+# xvba
+PKG_USE_NAME_xvba="ATI/AMD XvBA"
+PKG_USE_SECTION_xvba="hwaccel"
+PKG_USE_ARCH_xvba="i386 x86_64"
 
 # wifi
 PKG_USE_NAME_wifi="Wi-Fi"

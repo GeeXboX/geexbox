@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. config/options
+
+setup_toolchain target
+
+cd $BUILD/$1*
+
+do_autoconf
+do_configure \
+	--enable-pthread
+
+make
+make_install

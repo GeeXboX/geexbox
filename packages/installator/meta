@@ -1,10 +1,17 @@
 PKG_NAME=installator
-PKG_VERSION=2.0
+PKG_VERSION=3.0
 PKG_REV=1
-PKG_ARCH="i386"
-PKG_BUILD_DEPENDS="syslinux"
-PKG_RUN_DEPENDS="ncurses dialog util-linux-ng gnu-fdisk e2fsprogs grub"
+PKG_ARCH="i386 x86_64"
+PKG_RUN_DEPENDS="syslinux util-linux-ng e2fsprogs parted efibootmgr"
 PKG_PRIORITY=optional
 PKG_SECTION=admin
 PKG_SHORTDESC="GeeXboX installator"
 PKG_LONGDESC="This package contains the GeeXboX installer."
+
+# flag option checked by packages/syslinux/installdev
+PKG_KCONFIG_EXTRA="
+config OPT_INSTALLATOR
+  bool
+  depends on PKG_installator
+  default y 
+"

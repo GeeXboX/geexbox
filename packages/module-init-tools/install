@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. config/options
+
+cd $BUILD/$1*
+cd objdir-target
+do_install sbin

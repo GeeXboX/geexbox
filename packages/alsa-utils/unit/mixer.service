@@ -1,5 +1,6 @@
 [Unit]
 Description=ALSA mixer configuration
+After=sysinit.target
 
 [Service]
 Type=oneshot

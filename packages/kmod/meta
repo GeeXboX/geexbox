@@ -1,0 +1,9 @@
+PKG_NAME="kmod"
+PKG_VERSION="8"
+PKG_URL="http://www.kernel.org/pub/linux/utils/kernel/kmod/$PKG_NAME-$PKG_VERSION.tar.xz"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_PRIORITY="optional"
+PKG_SECTION="system"
+PKG_SHORTDESC="tools to handle Linux kernel modules tasks"
+PKG_LONGDESC="kmod offers the needed flexibility and fine grained control over insertion, removal, configuration and listing of kernel modules."
+

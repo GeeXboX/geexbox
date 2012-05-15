@@ -5,50 +5,30 @@
 # See http://wiki.xbmc.org/index.php?title=Advancedsettings.xml for details #
 #############################################################################
 
-USERDATA="$HOME/.xbmc/userdata"
-TEMP_DIR="$HOME/.xbmc/temp"
+USERDATA="/root/.xbmc/userdata"
 ADV_SETTINGS="$USERDATA/advancedsettings.xml"
-GUI_SETTINGS="$USERDATA/guisettings.xml"
 SOURCES="$USERDATA/sources.xml"
-
-gpu_guess () {
-
-  GPUDEVICE=$(cat /tmp/pci | grep 0300)
-  GPUTYPE="OTHER"
-  [ "$(echo $GPUDEVICE | grep 8086)" ] && GPUTYPE="INTEL"
-  [ "$(echo $GPUDEVICE | grep 10de)" ] && GPUTYPE="NVIDIA"
-  [ "$(echo $GPUDEVICE | grep 1002)" ] && GPUTYPE="AMD"
-
-  export GPUTYPE
-}
-
-set_default_gui_settings () {
-  [ -f "$GUI_SETTINGS" ] && return
-
-  [ "$GPUTYPE" != "NVIDIA" -a "$GPUTYPE" != "AMD" ] && return
-
-  cat > "$GUI_SETTINGS" << EOF
-<settings>
-  <!-- Sync to vblank -->
-  <videoscreen>
-    <vsync>2</vsync>
-  </videoscreen>
-</settings>
-EOF
-}
 
 set_default_advanced_settings () {
   [ -f "$ADV_SETTINGS" ] && return
 
+FULLSCREEN=true
+if dmesg | grep "OMAP4 Panda board" -q ; then 
+  FULLSCREEN=false
+fi
+
+
   cat > "$ADV_SETTINGS" << EOF
 <advancedsettings>
   <useddsfanart>true</useddsfanart>
+  <cputempcommand>sed -e 's/\([0-9]*\)[0-9]\{3\}.*/\1 C/' /sys/class/thermal/thermal_zone0/temp</cputempcommand>
   <samba>
     <clienttimeout>10</clienttimeout>
   </samba>
   <gui>
     <algorithmdirtyregions>1</algorithmdirtyregions>
   </gui>
+  <fullscreen>$FULLSCREEN</fullscreen>
 </advancedsettings>
 EOF
 }
@@ -83,11 +63,9 @@ set_default_sources () {
 EOF
 }
 
-# clean temp dir
-rm -rf "$TEMP_DIR/*"
-
 mkdir -p "$USERDATA"
-gpu_guess
 set_default_advanced_settings
-set_default_gui_settings
 set_default_sources
+
+# remote
+[ -f /usr/share/xbmc/system/Lircmap.xml ] && cp /usr/share/xbmc/system/Lircmap.xml "$USERDATA"

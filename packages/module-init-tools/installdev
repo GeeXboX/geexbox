@@ -2,5 +2,6 @@
 
 . config/options
 
-mkdir -p $INSTALL/bin
-cp $BUILD/$1*/build/depmod $INSTALL/bin
+cd $BUILD/$1*
+cd objdir-host
+do_installdev bin toolchain

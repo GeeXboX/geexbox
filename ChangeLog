@@ -1,3 +1,96 @@
+xxxx-xx-xx  Benjamin Zores <ben@geexbox.org>
+
+        * bug-fix release version 2.0.1
+
+	- System:
+	 + Restored HDD installation setup (now supports both i386 and x86_64).
+	 + Fixed eject issue when booting from CD.
+	 + Xorg Server v1.10.4.
+
+	- Audio Drivers:
+	 + Fixed some broken audio devices audio mixer.
+	 + Fixed Tegra2 audio support.
+
+	- Video Drivers:
+	 + Fixed Tegra2 HDMI resolution auto-detection.
+	 + Support for EFI framebuffer.
+	 + Support for ATI/AMD proprietary drivers.
+	 + Support for ATI/AMD GPU acceleration through VA-API/XvBA.
+	 + Support for nVidia legacy GPUs.
+
+	- Input:
+	 + Restored support for some LIRC-compatible devices.
+
+	- Networking Features:
+	 + Added some missing WiFi cards firmwares.
+
+        - MediaCenter:
+	 + Added system's packages check/updater graphical utility.
+	 + Added network settings configuration graphical utility.
+
+2011-09-17  Benjamin Zores <ben@geexbox.org>
+
+        * release version 2.0, codename "Love It or Shove It"
+
+	- Supported Architectures:
+	 + x86 32 and 64 bits PCs
+	 + ARM TI OMAP4 Pandaboard
+	 + ARM nVidia Tegra2 Harmony
+
+	- System:
+	 + Linux Kernel v2.6.38.8.
+	 + BusyBox v1.19.2
+	 + Connman Network Manager v0.76.
+	 + Xorg Server v1.10.3.
+	 + Mesa v7.11.
+	 + OPKG Package Manager v0.18
+	 + USB persistent user data storage.
+
+	- Audio Drivers:
+	 + ALSA v1.0.24.1.
+	 + Support for Analog, SPDIF and HDMI output devices.
+
+	- Video Drivers:
+	 + Support for Intel, nVidia, ATI, Matrox and VIA GPUs.
+	 + Support for CRT, LCD and HDMI output devices.
+	 + OpenGL and OpenGL|ES hardware assisted graphics acceleration.
+	 + VDPAU, VA-API and Crystal HD hardware assisted video decoding
+	   for nVidia, Intel and Broadcom GPUs.
+
+	- Input:
+	 + Mouse and Synaptics touch pads.
+	 + HID Keyboards.
+	 + Remote Controls.
+
+	- Networking Features:
+         + NFS shares.
+	 + Samba auto-discovery.
+	 + UPnP / DLNA media discovery.
+	 + ZeroConf services announcements.
+	 + HTTP server.
+	 + FTP server
+
+        - MediaCenter:
+	 + XBMC Media Center 10.1 "Dharma" frontend
+	  * Movies and TV Shows, with subtitles support.
+	  * Music Collection
+	  * Pictures and Slideshows
+	  * CDDA, DVD and (unencrypted) Bluray support.
+	  * Media Database Support.
+	  * Internet MovieDB / TVDB metadata and covers grabbers.
+	  * Skins
+
+	- Deprecated Features:
+	 + DVB Digital TV cards support (will come back soon).
+	 + V4L Analog TV cards support (dead once for all).
+	 + ISO Generator (no that useful anymore).
+	 + Legacy HDD Install (replaced by LiveUSB support
+	   with persistent data storage).
+
+
+	So Long and Eternal Thanks to All Contributors Over the Years !!
+
+
 2010-03-09  Benjamin Zores  <ben@geexbox.org>
 
 	* release version 2.0-alpha2.

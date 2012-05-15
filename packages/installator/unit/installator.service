@@ -1,0 +1,14 @@
+[Unit]
+Description=Installator
+After=systemd-user-sessions.service plymouth-quit-wait.service
+Before=getty.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/installator
+StandardInput=tty-force
+StandardOutput=inherit
+StandardError=inherit
+
+[Install]
+WantedBy=installator.target

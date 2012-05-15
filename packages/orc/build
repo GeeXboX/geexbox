@@ -3,6 +3,14 @@
 . config/options
 
 cd $BUILD/$1*
+
+BACKENDS=""
+if [ "$FPU_OPTIMIZATIONS" = neon ]; then
+   BACKENDS="--enable-backend=arm --enable-backend=neon"
+elif [ "$TARGET_ARCH" = arm ]; then
+   BACKENDS="--enable-backend=arm"
+fi
+
 mkdir -p objdir-host
 cd objdir-host
 do_configure host \
@@ -20,6 +28,7 @@ do_configure target \
   --disable-gtk-doc \
   --disable-gtk-doc-html \
   --disable-gtk-doc-pdf \
+  $BACKENDS \
 
 make
 make_install

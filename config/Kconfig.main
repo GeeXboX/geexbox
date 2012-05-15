@@ -110,10 +110,6 @@ config TARGET_LIBC_eglibc
   bool "eglibc"
   select PKG_eglibc
 
-config TARGET_LIBC_glibc
-  bool "glibc"
-  select PKG_glibc
-
 config TARGET_LIBC_uclibc
   bool "uclibc"
   select PKG_uclibc
@@ -318,7 +314,7 @@ config OPT_TARGET_INITRAMFS
 
 config OPT_TARGET_SNOWBALL_EMMC
   bool "Snowball eMMC image"
-  depends on TARGET_MACHINE_arm_ux500_snowball
+  depends on ( TARGET_MACHINE_arm_ux500_snowball-v5 || TARGET_MACHINE_arm_ux500_snowball-v3 )
   default y
   help
     Build a minimal image for the Snowball eMMC, with only the necessary
@@ -336,11 +332,11 @@ config OPT_PACKAGE_REPO
 config TIMEZONE
   bool "Enable timezone support"
   default n
-  select PKG_timezone-data if ( TARGET_LIBC_glibc || TARGET_LIBC_eglibc )
+  select PKG_timezone-data if TARGET_LIBC_eglibc
 
 config OPT_INCLUDED_TIMEZONES
   string "Included timezones"
-  depends on TIMEZONE && ( TARGET_LIBC_glibc || TARGET_LIBC_eglibc )
+  depends on TIMEZONE && TARGET_LIBC_eglibc
   default ""
   help
     Can be empty, "all" or a list of zoneinfo names
@@ -353,7 +349,7 @@ config OPT_TIMEZONE
   help
     Timezone to use (empty disables timezone support)
     if TARGET_LIBC=uclibc use a TZ environment string 
-    if TARGET_LIBC=glibc use a zoneinfo name and remember 
+    if TARGET_LIBC=eglibc use a zoneinfo name and remember 
     to set INCLUDED_TIMEZONES accordingly
 
 choice KEYMAP
@@ -371,9 +367,6 @@ config KEYMAP_QWERTZ
 
 endchoice
 
-# Remote and receiver configuration options
-source "../../config/Kconfig.remote"
-
 config OPT_SUB_CHARSET
   string "Subtitles charset"
   depends on ( PKG_MPlayer || PKG_xine-lib || PKG_gstreamer || PKG_vlc )
@@ -381,7 +374,7 @@ config OPT_SUB_CHARSET
 
 config LOCALE
   bool "Enable locale support"
-  depends on ( TARGET_LIBC_glibc || TARGET_LIBC_eglibc )
+  depends on TARGET_LIBC_eglibc
   select PKG_i18n-locales
   default y
 
@@ -476,6 +469,12 @@ config OPT_TELNET_SERVER
   bool "Start at boot"
   depends on TELNET_SERVER
   default y if START_SERVICES
+  default n
+
+config SSH_SERVER
+  bool "SSH server"
+  depends on USE_network
+  select PKG_dropbear
   default n
 
 config FTP_SERVER
@@ -596,7 +595,6 @@ config OPT_COMPRESSION_METHOD
 config OPT_TARGET_LIBC
   string
   default "eglibc" if TARGET_LIBC_eglibc
-  default "glibc" if TARGET_LIBC_glibc
   default "uclibc" if TARGET_LIBC_uclibc
 
 config OPT_KEYMAP
@@ -610,20 +608,26 @@ config OPT_EGL_PROVIDER
   default "mesa" if EGL_PROVIDER_MESA
   default "sgx" if EGL_PROVIDER_SGX
   default "tegra" if EGL_PROVIDER_TEGRA
-  default "imx" if EGL_PROVIDER_IMX
+  default "imx5" if EGL_PROVIDER_IMX5
+  default "imx6" if EGL_PROVIDER_IMX6
+  default "mali" if EGL_PROVIDER_MALI
 
 config OPT_GLES_PROVIDER
   string
   default "mesa" if GLES_PROVIDER_MESA
   default "sgx" if GLES_PROVIDER_SGX
   default "tegra" if GLES_PROVIDER_TEGRA
-  default "imx" if GLES_PROVIDER_IMX
+  default "imx5" if GLES_PROVIDER_IMX5
+  default "imx6" if GLES_PROVIDER_IMX6
+  default "mali" if OVG_PROVIDER_MALI
 
 config OPT_OVG_PROVIDER
   string
   default "mesa" if OVG_PROVIDER_MESA
   default "sgx" if OVG_PROVIDER_SGX
-  default "imx" if OVG_PROVIDER_IMX
+  default "imx5" if OVG_PROVIDER_IMX5
+  default "imx6" if OVG_PROVIDER_IMX6
+  default "mali" if OVG_PROVIDER_MALI
 
 config OPT_OMAX_PROVIDER
   string

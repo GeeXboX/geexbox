@@ -39,6 +39,9 @@ for s in $FILES; do
       *.tar)
         tar xf $f -C $3
         ;;
+      *.tar.xz | *.txz)
+        tar xJf $f -C $3
+        ;;
       *.tar.bz2 | *.tbz)
         tar xjf $f -C $3
         ;;
@@ -53,6 +56,15 @@ for s in $FILES; do
         ;;
       *.diff.gz | *.patch.gz | patch-*.gz)
         zcat $f | patch -d $3 -p1
+        ;;
+      *.zip)
+       unzip $f -d $3
+        ;;
+      *.deb)
+        DEB_DATA=data.tar.gz
+        ar x $f $DEB_DATA
+        tar xzf $DEB_DATA -C $3
+        rm $DEB_DATA
         ;;
       *)
         cp -pPR $f $3

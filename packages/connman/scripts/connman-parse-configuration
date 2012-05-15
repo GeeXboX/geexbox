@@ -1,6 +1,9 @@
 #!/bin/sh
 
 . /etc/network
+. /etc/network-backend
+
+[ "$NET_B" != connman ] && exit 1
 
 profile=/var/lib/connman/default.profile
 
@@ -9,7 +12,7 @@ mkdir -p /var/lib/connman
 hostname="`cat /etc/hostname`"
 echo "127.0.0.1 localhost $hostname" > /etc/hosts 
 
-[ -z "$IFACE" ] && IFACE=eth0
+[ -z "$IFACE" ] && IFACE=eth0 || IFACE=`echo $IFACE | tr '[A-Z]' '[a-z]'`
 [ -f /sys/class/net/$IFACE/address ] && \
   IFACE=`cat /sys/class/net/$IFACE/address`
 
@@ -18,6 +21,8 @@ if [ "$NETWORK" = "WLAN" ]; then
   if [ "$SECURITY" = "WEP" -a -n "$PASSPHRASE" ]; then
     MODE="managed_wep"
   elif [ "$SECURITY" = "PSK" -a -n "$PASSPHRASE" ]; then
+    MODE="managed_psk"
+  elif [ "$SECURITY" = "RSN" -a -n "$PASSPHRASE" ]; then
     MODE="managed_psk"
   else
     MODE="managed_none"
@@ -32,6 +37,7 @@ if [ "$NETWORK" = "WLAN" ]; then
    echo "SSID=$SSID_HEX" >> $profile
    [ -n "$PASSPHRASE" ] && echo "Passphrase=$PASSPHRASE" >> $profile
    echo "Favorite=true" >> $profile
+   [ "$SECURITY" = "RSN" ] && echo "Security=rsn" >> $profile
    echo "AutoConnect=true" >> $profile
 else 
   echo "[ethernet_`echo $IFACE | sed 's/://g'`_cable]" > $profile
