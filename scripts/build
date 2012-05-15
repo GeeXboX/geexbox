@@ -45,7 +45,8 @@ fi
 if [ ! -f $STAMP ]; then
   rm -f $STAMP
 
-  set_title "BUILD    $1"
+  printf "%${INDENT}c BUILD    $1\n" >&$SILENT_OUT
+  export INDENT=$((${INDENT:-1}+$INDENT_SIZE))
 
   get_meta $1
 

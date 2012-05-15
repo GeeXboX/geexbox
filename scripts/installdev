@@ -44,7 +44,8 @@ if [ "$FORCE" != true -a -f $STAMP ]; then
   exit 0
 fi
 
-set_title "INSTALLDEV  $1"
+printf "%${INDENT}c INSTALLDEV  $1\n" >&$SILENT_OUT
+export INDENT=$((${INDENT:-1}+$INDENT_SIZE))
 
 $SCRIPTS/packagedev $1
 

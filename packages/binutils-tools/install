@@ -1,9 +1,0 @@
-#!/bin/sh
-
-. config/options
-
-cd $BUILD/$1*
-
-do_install usr/bin/objdump
-do_install usr/bin/readelf
-do_install usr/lib/lib*.so*

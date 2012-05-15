@@ -4,7 +4,8 @@
 
 clean ()
 {
-  set_title "CLEAN    $1"
+  printf "%${INDENT}c CLEAN    $1\n" >&$SILENT_OUT
+  export INDENT=$((${INDENT:-1}+$INDENT_SIZE))
 
   if [ "$CLEAN_SOURCES" = true ]; then
     rm -rf $SOURCES/$1

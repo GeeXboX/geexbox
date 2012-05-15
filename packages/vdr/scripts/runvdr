@@ -1,11 +1,5 @@
 #!/bin/sh
 
-. /etc/pvr.conf
-
-[ "$BACKEND" != vdr ] && exit 0
-
-[ ! -d /video ] && mkdir /video
-
 PLUGINS=""
 for file in /etc/vdr/plugins.d/*; do
   if [ -f "$file" ]; then
@@ -19,11 +13,8 @@ for file in /etc/vdr/plugins.d/*; do
     [ -n "$INITCMD" ] && eval $INITCMD
   fi
 done
-
-[ -r /etc/locale.conf ] && export LANG=`cat /etc/locale.conf | cut -d= -f2`
+  
+[ -r /etc/locale ] && export LANG=`cat /etc/locale`
 export DISPLAY=":0"
-
-# special for germany :
-[ "$LANG" = de_DE.UTF-8 ] && export VDR_CHARSET_OVERRIDE=”ISO-8859-15″
-
-eval vdr -g /tmp --vfat --no-kbd $PLUGINS -v /video -c /etc/vdr
+  
+eval vdr -g /tmp --vfat --no-kbd $PLUGINS

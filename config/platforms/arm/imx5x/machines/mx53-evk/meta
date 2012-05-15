@@ -1,3 +1,0 @@
-MACHINE_NAME=mx53-evk
-MACHINE_DESC="Freescale i.MX53 Evaluation Kit"
-MACHINE_UBOOT_CONFIG="mx53evk_config"

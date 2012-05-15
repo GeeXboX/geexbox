@@ -8,7 +8,8 @@ STAMP=$PKGROOT/$PKG_OPK
 
 [ ! -f $STAMP ] && exit 0
 
-set_title "UNPACKAGE  $1"
+printf "%${INDENT}c UNPACKAGE  $1\n" >&$SILENT_OUT
+export INDENT=$((${INDENT:-1}+$INDENT_SIZE))
 
 $SCRIPTS/uninstall $1
 $SCRIPTS/uninstall $1-dbg

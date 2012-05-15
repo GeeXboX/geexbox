@@ -6,13 +6,7 @@ cd $(kernel_path)/tools/perf
 
 setup_toolchain target
 
-make \
-  ARCH=$TARGET_ARCH \
-  EXTRA_CFLAGS="$CFLAGS" \
-  CROSS_COMPILE=$TARGET_PREFIX \
-  NO_PERL=1 \
-  clean
-
+make clean
 make \
   ARCH=$TARGET_ARCH \
   EXTRA_CFLAGS="$CFLAGS" \

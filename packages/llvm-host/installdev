@@ -1,9 +1,0 @@
-#!/bin/sh
-
-. config/options
-
-cd $BUILD/llvm-*/objdir-host
-
-do_installdev usr/bin toolchain
-do_installdev usr/include toolchain
-do_installdev usr/lib toolchain

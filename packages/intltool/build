@@ -11,6 +11,5 @@ export PERL=$ROOT/$TOOLCHAIN/bin/hostperl
 
 make
 make_install
-
-sed -i .install/usr/bin/intltoolize -e "s:^prefix=.*\$:prefix=$ROOT/$TOOLCHAIN:"
-
+#cp -f intltool-extract intltool-merge intltool-update intltool-prepare \
+# $ROOT/$TOOLCHAIN/bin

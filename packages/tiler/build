@@ -2,11 +2,10 @@
 
 . config/options
 
-cd $BUILD/$1*
+cd $BUILD/$1*/memmgr
 
-sed -i 's%MEMMGR_CFLAGS="-Werror -Wall -pipe -ansi"%MEMMGR_CFLAGS="-Wall -pipe -ansi"%' configure.ac
+sed -i 's%MEMMGR_CFLAGS="-Werror -Wall -pipe -ansi"%MEMMGR_CFLAGS="-Wall -pipe -ansi"%' configure
 
-do_autoconf
 do_configure \
   --enable-tilermgr \
   --disable-tests \

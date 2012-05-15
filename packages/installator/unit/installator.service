@@ -8,7 +8,6 @@ Type=oneshot
 ExecStart=/sbin/installator
 StandardInput=tty-force
 StandardOutput=inherit
-StandardError=inherit
 
 [Install]
 WantedBy=installator.target

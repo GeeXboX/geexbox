@@ -1,3 +1,0 @@
-MACHINE_NAME="trimslice"
-MACHINE_DESC="CompuLab Trimslice"
-MACHINE_UBOOT_CONFIG="tegra2_harmony_config"

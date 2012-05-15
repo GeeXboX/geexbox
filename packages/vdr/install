@@ -13,12 +13,13 @@ cp $ROOT/$PACKAGES/$1/scripts/* $INSTALL/usr/bin
 
 mkdir -p $INSTALL/usr/lib/vdr
 
-do_install usr/share/locale
+for loc in $INCLUDED_LOCALES; do
+  LOCALE=`echo $loc|cut -f1 -d.`
+  [ -d .install/usr/share/locale/$LOCALE ] && \
+    do_install usr/share/locale/$LOCALE
+done
 
-rm .install/etc/vdr/channels.conf
-touch .install/etc/vdr/channels.conf
 do_install etc/vdr
-
 [ "$SERVICES" = yes ] && echo '0.0.0.0/0' >> $INSTALL/etc/vdr/svdrphosts.conf
 mkdir -p $INSTALL/etc/vdr/plugins
 mkdir -p $INSTALL/etc/vdr/plugins.d

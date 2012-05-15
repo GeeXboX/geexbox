@@ -54,7 +54,8 @@ if [ ! -f $INSTALL_RULE ]; then
   exit 0
 fi
 
-set_title "PACKAGE  $1"
+printf "%${INDENT}c PACKAGE  $1\n" >&$SILENT_OUT
+export INDENT=$((${INDENT:-1}+$INDENT_SIZE))
 
 rm -f $STAMP
 

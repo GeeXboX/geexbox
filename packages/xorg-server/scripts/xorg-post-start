@@ -1,7 +1,5 @@
 #!/bin/sh
 
-. /etc/X11/X.cfg
-
 # wait a bit for Xorg to startup
 sleep 1
 
@@ -29,6 +27,6 @@ for arg in $(cat /proc/cmdline); do
       ;;
   esac
 done
-setxkbmap -display :0.0 $KEYMAP
+setxkbmap -display $DISPLAY $KEYMAP
 
 exit 0

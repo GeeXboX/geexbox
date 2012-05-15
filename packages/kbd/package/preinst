@@ -1,7 +1,0 @@
-#!/bin/sh
-
-echo "Pre install:"
-echo "  Removing symlinks to busybox... "
-rm /usr/bin/chvt
-rm /usr/bin/showkey
-echo "  Done."

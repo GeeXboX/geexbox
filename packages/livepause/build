@@ -5,7 +5,6 @@
 cd $BUILD/$1*
 
 sed 's|-Werror||' -i src/Makefile.am
-do_autoconf
 do_configure
 make
 make_install

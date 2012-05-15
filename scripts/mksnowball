@@ -2,7 +2,6 @@
 
 . config/options
 
-$SCRIPTS/installdev mksnowball
 $SCRIPTS/installdev snowball-startupfiles
 $SCRIPTS/installdev u-boot
 

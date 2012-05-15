@@ -1,5 +1,5 @@
 [Unit]
 Description=Installator
-Requires=basic.target
+Requires=multi-user.target
 Conflicts=rescue.service rescue.target
 AllowIsolate=yes

@@ -4,7 +4,6 @@
 
 cd $BUILD/$1*
 xorg_drv_configure_prepend
-do_autoconf
 do_configure \
             --enable-dri \
             --enable-kms-only \

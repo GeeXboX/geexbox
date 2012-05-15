@@ -39,7 +39,8 @@ if [ -f $STAMP ]; then
   exit 0
 fi
 
-set_title "INSTALL  $1"
+printf "%${INDENT}c INSTALL  $1\n" >&$SILENT_OUT
+export INDENT=$((${INDENT:-1}+$INDENT_SIZE))
 
 $SCRIPTS/package $1
 

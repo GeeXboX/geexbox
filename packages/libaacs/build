@@ -4,7 +4,6 @@
 
 cd $BUILD/$1*
 
-do_autoconf
 do_configure
 
 make

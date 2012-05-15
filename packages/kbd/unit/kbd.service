@@ -1,9 +1,0 @@
-[Unit]
-Description=Keyboard layout for tty
-
-[Service]
-EnvironmentFile=/etc/vconsole.conf
-ExecStart=/usr/bin/loadkeys $KEYMAP
-
-[Install]
-WantedBy=basic.target

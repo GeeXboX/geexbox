@@ -29,16 +29,16 @@ case $1 in
     files_pkg="libgtk2.0-dev libglib2.0-dev libglade2-dev"
     ;;
   xconfig)
-    files="/usr/include/qt4/QtCore/qconfig.h"
-    files_pkg="qt4-dev-tools"
+    files="/usr/include/qt3/qt.h"
+    files_pkg="qt3-dev-tools"
     ;;
   silentoldconfig|oldconfig|config)
     ;;
   build)
-    deps="gcc g++ sed patch touch tar bzip2 gzip perl flex bison cp gawk cpio makeinfo msgfmt cmp yacc lzma git"
-    deps_pkg="gcc g++ sed patch coreutils tar bzip2 gzip perl flex bison coreutils gawk cpio texinfo gettext diff lzma libtool git"
+    deps="gcc g++ sed patch touch tar bzip2 gzip perl flex bison cp gawk cpio makeinfo msgfmt cmp yacc lzma"
+    deps_pkg="gcc g++ sed patch coreutils tar bzip2 gzip perl flex bison coreutils gawk cpio texinfo gettext diff lzma libtool"
     files="/usr/include/stdio.h /usr/include/readline/readline.h /usr/include/ncurses.h"
-    files_pkg="libc6-dev libreadline6-dev libncurses5-dev"
+    files_pkg="libc6-dev libreadline5-dev libncurses5-dev"
     ;;
   docs)
     deps="asciidoc a2x dblatex xmlto db2html source-highlight"
@@ -57,14 +57,8 @@ case $1 in
       exit 1
     fi
     ;;
-  vbox)
-    if [ "$2" != "review" ] && [ ! `which virtualbox` ] && [ ! `which uuid` ]; then
-      echo "Your system doesn't seem to have VirtualBox installed"
-      exit 1
-    fi
-    ;;
   review)
-    for target in get kconfiginit menuconfig gconfig xconfig build docs vmx qemu vbox rootfs; do
+    for target in get kconfiginit menuconfig gconfig xconfig build docs vmx qemu rootfs; do
       $SCRIPTS/checkdeps $target review
     done
     ;;

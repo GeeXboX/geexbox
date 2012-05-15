@@ -4,7 +4,6 @@
 
 cd $BUILD/$1*
 
-export CONFIG_SHELL=/bin/bash
 do_configure \
             --libexecdir=/usr/lib \
             --enable-gettext=no \

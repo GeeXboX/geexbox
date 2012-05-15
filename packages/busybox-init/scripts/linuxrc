@@ -61,9 +61,6 @@ for arg in $(cat /proc/cmdline); do
     ip=*)
     IP="${arg#ip=}"
       ;;
-    external-persistent)
-      EXTERNAL_PERSISTENT=1
-      ;;
     initshell)
       echo "Dropping to shell as requested"
       exec sh
@@ -93,33 +90,6 @@ if [ -n "$ROOT" ]; then
     dbg_echo -n "[$i] Trying root=$ROOT as requested..."
     if mount -o $ROOT_MODE $ROOT /mnt >/dev/null 2>&1; then
       if [ "$ROOTFS" = flat ]; then
-        dbg_echo "found."
-        FOUND_ROOTFS=yes
-        break
-      elif [ "$EXTERNAL_PERSISTENT" = 1 ] ; then
-        FSTYPE=`grep "$ROOT" /proc/mounts | cut -d" " -f3` 
-        mkdir -p /cache
-        mkdir -p /persistent-tmp
-        mkdir -p /persistent
-        mount -t tmpfs tmpfs /cache
-        mount -t tmpfs tmpfs /persistent
-        mount -o loop,rw,noatime -t ext2 /mnt/$PERSISTENT /persistent-tmp
-        mkdir -p /persistent-tmp/root
-        for d in bin boot etc firmware lib sbin sys usr var ; do
-          cp -R /persistent-tmp/$d /persistent/
-        done
-        ln -sf /persistent/root /persistent/root
-        mkdir -p /persistent/etc
-        echo "$ROOT /data $FSTYPE rw 0 0" >/persistent/etc/fstab
-        echo "/data/$PERSISTENT /persistent  ext2 rw,noatime 0 0" >>/persistent/etc/fstab
-        cp /mnt/$ROOTFS /cache/rootfs
-        sync
-        umount /persistent-tmp
-        ROOTFS=/rootfs
-        mount -r /mnt
-        umount /mnt || umount -l /mnt
-        mount --move /cache /mnt         
-        mount -t squashfs /mnt/$ROOTFS /squashfs >/dev/null 2>&1
         dbg_echo "found."
         FOUND_ROOTFS=yes
         break
@@ -188,7 +158,7 @@ if [ -z "$ROOT" ]; then
         ROOT_TYPE=disk
       fi
       if [ "$ROOT_TYPE" = cdrom -a -z "$NOCACHE" ]; then
-        mkdir -p /cache
+        mkdir /cache
         mount -t tmpfs tmpfs /cache
         cp /mnt/$ROOTFS /cache/rootfs
         ROOTFS=/rootfs
@@ -211,7 +181,7 @@ if [ -z "$ROOT" ]; then
   cd /
 fi
 
-[ -z "$INIT" ] && INIT=/sbin/init
+[ -z "$INIT" ] && INIT=/bin/systemd
 
 if [ "$ROOTFS" = flat ]; then
   if [ ! -x /mnt/$INIT ]; then
@@ -237,8 +207,7 @@ else
       unset DATA
     fi
   fi
-  [ -z "$DATA" -a -z "$EXTERNAL_PERSISTENT" ] && mount -t tmpfs none /rw
-  [ "$EXTERNAL_PERSISTENT" = 1 ] && mount --move /persistent /rw
+  [ -z "$DATA" ] && mount -t tmpfs none /rw
   if ! mount -t aufs -o br=/rw:/squashfs none /newroot; then
     echo "Cannot mount aufs, dropping to shell"
     exec sh
@@ -251,24 +220,18 @@ else
   mount --move /rw /newroot/.data
   mount --move /squashfs /newroot/.squashfs
   mount --move /mnt /newroot/.root
-  mkdir -p /newroot/dev
-  mkdir -p /newroot/run/initramfs/bin /newroot/run/initramfs/sbin /newroot/run/initramfs/lib 
+  mkdir -p /newroot/run/initramfs/bin /newroot/run/initramfs/sbin
   cp -P /bin/busybox /bin/sh /newroot/run/initramfs/bin/
   cp -P /bin/shutdown /newroot/run/initramfs/
-  cp -P /lib/* /newroot/run/initramfs/lib
-  cp -P /sbin/mount.ntfs /newroot/run/initramfs/sbin
-  cp -P /bin/ntfs-3g /newroot/run/initramfs/bin
 fi
 
 INIT_ARGS=`cat /proc/cmdline`
-mknod /newroot/dev/kmsg c 1 11 >/dev/null 2>&1
 
 # Reset kernel hotplugging
 echo "" > /proc/sys/kernel/hotplug
 umount /sys
 umount /dev
 umount /proc
-
 
 # Change to the new root partition and execute /sbin/init
 if ! exec /bin/busybox switch_root /newroot $INIT $INIT_ARGS; then

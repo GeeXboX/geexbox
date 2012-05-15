@@ -45,7 +45,8 @@ if [ ! -f $INSTALLDEV_RULE ]; then
   exit 0
 fi
 
-set_title "PACKAGEDEV  $1"
+printf "%${INDENT}c PACKAGEDEV  $1\n" >&$SILENT_OUT
+export INDENT=$((${INDENT:-1}+$INDENT_SIZE))
 
 rm -f $STAMP
 

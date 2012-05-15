@@ -1,9 +1,0 @@
-#!/bin/sh
-
-. config/options
-
-cd $BUILD/$1*
-
-rm -rf .install
-mkdir -p .install/firmware
-cp -PR dvb* .install/firmware

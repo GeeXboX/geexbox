@@ -15,7 +15,6 @@ setup_toolchain host
 do_configure host \
             --without-ncurses \
             --disable-tls \
-            --disable-wall \
 
 make
 make_install toolchain
@@ -27,7 +26,6 @@ cd objdir-target
 setup_toolchain target
 do_configure target \
             --without-ncurses \
-            --disable-wall \
             $TLS_CONFIG \
 
 make

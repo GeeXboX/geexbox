@@ -26,10 +26,11 @@ do_configure \
             --disable-portal \
             --enable-loopback \
             --disable-google \
-            --enable-meego=builtin \
+            --enable-meego \
             --disable-iwmx \
             --disable-iospm \
-            --disable-ntpd \
+            --enable-ntpd \
+            --with-ntpd=/usr/sbin/ntpd \
             --disable-polkit \
             --enable-client \
             --enable-test \

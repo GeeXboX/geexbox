@@ -4,4 +4,4 @@
 
 cd $BUILD/$1*
 
-do_install firmware
+do_install firmware/omap4
