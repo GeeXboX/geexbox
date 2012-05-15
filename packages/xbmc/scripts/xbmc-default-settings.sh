@@ -6,6 +6,7 @@
 #############################################################################
 
 USERDATA="$HOME/.xbmc/userdata"
+ADDONS="$HOME/.xbmc/addons"
 TEMP_DIR="$HOME/.xbmc/temp"
 ADV_SETTINGS="$USERDATA/advancedsettings.xml"
 GUI_SETTINGS="$USERDATA/guisettings.xml"
@@ -91,3 +92,14 @@ gpu_guess
 set_default_advanced_settings
 set_default_gui_settings
 set_default_sources
+
+# remote
+[ -f /usr/share/xbmc/system/Lircmap.xml ] && cp /usr/share/xbmc/system/Lircmap.xml "$USERDATA"
+
+# geexbox.network.cfg
+mkdir -p $ADDONS
+[ -d /usr/share/xbmc/addons/geexbox.network.cfg ]  && cp -R /usr/share/xbmc/addons/geexbox.network.cfg "$ADDONS"
+
+# geexbox.updater
+mkdir -p $ADDONS
+[ -d /usr/share/xbmc/addons/geexbox.updater ]  && cp -R /usr/share/xbmc/addons/geexbox.updater "$ADDONS"

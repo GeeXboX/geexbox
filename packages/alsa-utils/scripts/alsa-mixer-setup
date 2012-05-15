@@ -1,5 +1,11 @@
 #!/bin/sh
 
+. /etc/audio
+
+NOW=$(date +%Y%M%d%H%M)
+echo "Sound setup : begin $NOW" >> /tmp/debug-sound
+amixer -i >> /tmp/debug-sound
+
 [ ! -e /etc/asound.conf ] && echo "" > /etc/asound.conf
 
 mixer() {
@@ -109,8 +115,14 @@ if grep -q 'OMAP4 Panda board' /proc/cpuinfo; then
     echo "" >> /etc/asound.conf
     echo "pcm.!default { type hw card 1 device 0 }" >> /etc/asound.conf
   else
-    sed -i 's%pcm.*default.*%%' >> /etc/asound.conf
+    sed -i 's%pcm.*default.*%%' /etc/asound.conf
   fi
+fi
+
+# Required for Toshiba AC100 / Dyanbook AZ
+if grep -q 'Toshiba AC100' /proc/cpuinfo; then
+  # enable internal speakers
+  mixer 'SpeakerOut Mux' 'HPOut Mix'
 fi
 
 # set digital output mixer params
@@ -133,5 +145,10 @@ else
   mixer 'Analog Rear' 90%
   mixer 'Analog Center/LFE' 90%
 fi
+
+# Required for HP Pavilion dv7 Notebook
+mixer Speaker 90% unmute
+
+echo "Sound setup : stop" >> /tmp/debug-sound
 
 exit 0

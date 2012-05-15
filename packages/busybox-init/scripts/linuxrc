@@ -19,11 +19,17 @@ mount -t devtmpfs devtmpfs /dev
 echo '/bin/mdev' > /proc/sys/kernel/hotplug
 mdev -s
 
+# splash
+/bin/ply-image /plymouth/splash.png
+
 # parse kernel cmdline
 for arg in $(cat /proc/cmdline); do
   case $arg in
     root=*)
       ROOT="${arg#root=}"
+      ;;
+    rootfs=*)
+      ROOTFS="${arg#rootfs=}"
       ;;
     data=*)
       DATA="${arg#data=}"
@@ -34,8 +40,26 @@ for arg in $(cat /proc/cmdline); do
     quiet)
       QUIET=yes
       ;;
-    persistent)
-      PERSISTENT=yes
+    persistent*)
+      PERSISTENT="${arg#persistent=}"
+      [ "$PERSISTENT" = persistent ] && PERSISTENT="/casper-rw"
+      ;;
+    nocache)
+      NOCACHE=yes
+      ;;
+    ro|rootro)
+      ROOT_MODE=ro
+      ROOT_MODE_PART=ro
+      ;;
+    rw|rootrw)
+      ROOT_MODE=rw
+      ROOT_MODE_PART=rw
+      ;;
+    nfsroot=*)
+      NFSROOT="${arg#nfsroot=}"
+      ;;
+    ip=*)
+    IP="${arg#ip=}"
       ;;
     initshell)
       echo "Dropping to shell as requested"
@@ -44,21 +68,68 @@ for arg in $(cat /proc/cmdline); do
   esac
 done
 
-# try to mount the rootfs specified in cmdline...
+# if rootro, always mount root as r/o
+# if rootrw, always mount root as r/w
+# if neither, mount root as r/w only if persistent is enabled and we're
+# mounting a partition (not a disk); otherwise, mount root as r/o
+if [ -z "$ROOT_MODE" ]; then
+  ROOT_MODE=ro
+  if [ -n "$PERSISTENT" ]; then
+    ROOT_MODE_PART=rw
+  else
+    ROOT_MODE_PART=ro
+  fi
+fi
+
+# try to mount the rootfs specified in cmdline ... and wait for slow device
+[ -z "$ROOT" -a "$ROOTFS" = flat ] && ROOTFS="/rootfs"
+[ -z "$ROOTFS" ] && ROOTFS="/rootfs"
 if [ -n "$ROOT" ]; then
-  dbg_echo -n "Trying root=$ROOT as requested..."
-  if mount -o ro $ROOT /mnt >/dev/null 2>&1; then
+  COUNT="0 1 2 3 4 5 6 7 8 9"
+  for i in $COUNT; do
+    dbg_echo -n "[$i] Trying root=$ROOT as requested..."
+    if mount -o $ROOT_MODE $ROOT /mnt >/dev/null 2>&1; then
+      if [ "$ROOTFS" = flat ]; then
+        dbg_echo "found."
+        FOUND_ROOTFS=yes
+        break
+      elif mount -t squashfs /mnt/$ROOTFS /squashfs >/dev/null 2>&1; then
+        dbg_echo "found."
+        FOUND_ROOTFS=yes
+        break
+      else
+        dbg_echo "failed, cannot mount squashfs."
+        umount /mnt
+      fi
+    else
+      dbg_echo "failed, cannot mount device."
+    fi
+    sleep 1
+  done
+  [ -n "$FOUND_ROOTFS" ] || unset ROOT
+  unset FOUND_ROOTFS
+fi
+
+if [ -n "$NFSROOT" ] ; then
+  dbg_echo -n "Trying nfsroot=$NFSROOT as requested..."
+  ROOT=/mnt
+  if [ -z "$IP" ] ; then
+    ifconfig eth0 up >/dev/null 2>&1
+    udhcpc -s /bin/assign-ip >/dev/null 2>&1
+  fi
+  if mount -o nolock,$ROOT_MODE_PART $NFSROOT /mnt >/dev/null 2>&1; then
     if mount -t squashfs /mnt/rootfs /squashfs >/dev/null 2>&1; then
       dbg_echo "found."
+      FOUND_ROOTFS=yes
     else
-      dbg_echo "failed, cannot mount squashfs."
+      dbg_echo -n "failed, cannot mount squashfs."
       umount /mnt
-      unset ROOT
     fi
   else
-    dbg_echo "failed, cannot mount device."
-    unset ROOT
+    dbg_echo -n "failed, cannot mount $NFSROOT."
   fi
+  [ -n "$FOUND_ROOTFS" ] || unset ROOT
+  unset FOUND_ROOTFS
 fi
 
 # ...otherwise just scan the block devices for rootfs
@@ -70,20 +141,32 @@ if [ -z "$ROOT" ]; then
       echo $dev | grep -q loop && continue
       echo $dev | grep -q ram && continue
       dbg_echo -n "[$i] Trying $dev..."
-      if ! mount -o ro /dev/$dev /mnt >/dev/null 2>&1; then
-        # check for removable devices not built with isohybrid support
-        if [ $(cat /sys/block/$dev/removable) = 1 ]; then
-          dbg_echo -n "[$i] Trying ${dev}1..."
-          if ! mount -o rw /dev/${dev}1 /mnt >/dev/null 2>&1; then
-            dbg_echo "failed, cannot mount device."
-            continue
-          fi
+      if mount -o $ROOT_MODE /dev/$dev /mnt >/dev/null 2>&1; then
+        ROOT_DEV=$dev
+        if [ `cat /sys/block/$ROOT_DEV/device/type` -eq 5 ]; then
+          ROOT_TYPE=cdrom
         else
+          ROOT_TYPE=disk
+        fi
+      else
+        dbg_echo -n "[$i] Trying ${dev}1..."
+        if ! mount -o $ROOT_MODE_PART /dev/${dev}1 /mnt >/dev/null 2>&1; then
           dbg_echo "failed, cannot mount device."
           continue
         fi
+        ROOT_DEV=${dev}1
+        ROOT_TYPE=disk
       fi
-      if mount -t squashfs /mnt/rootfs /squashfs >/dev/null 2>&1; then
+      if [ "$ROOT_TYPE" = cdrom -a -z "$NOCACHE" ]; then
+        mkdir /cache
+        mount -t tmpfs tmpfs /cache
+        cp /mnt/$ROOTFS /cache/rootfs
+        ROOTFS=/rootfs
+        umount /mnt
+        eject -s $ROOT_DEV >/dev/null 2>&1 || eject $ROOT_DEV >/dev/null 2>&1
+        mount --move /cache /mnt
+      fi
+      if mount -t squashfs /mnt/$ROOTFS /squashfs >/dev/null 2>&1; then
         dbg_echo "found."
         FOUND_ROOTFS=yes
         break
@@ -100,39 +183,47 @@ fi
 
 [ -z "$INIT" ] && INIT=/bin/systemd
 
-if [ ! -x /squashfs/$INIT ]; then
+if [ "$ROOTFS" = flat ]; then
+  if [ ! -x /mnt/$INIT ]; then
     echo "Cannot find a valid root filesystem, dropping to shell"
     exec sh
-fi
+  fi
+  mount --move /mnt /newroot
+else
+  if [ ! -x /squashfs/$INIT ]; then
+    echo "Cannot find a valid root filesystem, dropping to shell"
+    exec sh
+  fi
 
-# setup aufs
-if [ "$PERSISTENT" = yes ]; then
-   DATA=/mnt/casper-rw
+  # setup aufs
+  if [ -n "$PERSISTENT" ]; then
+   DATA=/mnt/$PERSISTENT
    PERSISTENT_OPT="-o loop -t ext2"
    [ ! -f "$DATA" ] && unset DATA && unset PERSISTENT_OPT
-fi
-if [ -n "$DATA" ]; then
-  if ! mount $PERSISTENT_OPT -o rw,noatime $DATA /rw; then
-    echo "Cannot mount data partition, using tmpfs instead"
-    unset DATA
   fi
-fi
-[ -z "$DATA" ] && mount -t tmpfs none /rw
-if ! mount -t aufs -o br=/rw:/squashfs none /newroot; then
-  echo "Cannot mount aufs, dropping to shell"
-  exec sh
-fi
+  if [ -n "$DATA" ]; then
+    if ! mount $PERSISTENT_OPT -o rw,noatime $DATA /rw; then
+      echo "Cannot mount data partition, using tmpfs instead"
+      unset DATA
+    fi
+  fi
+  [ -z "$DATA" ] && mount -t tmpfs none /rw
+  if ! mount -t aufs -o br=/rw:/squashfs none /newroot; then
+    echo "Cannot mount aufs, dropping to shell"
+    exec sh
+  fi
 
-# move backed filesystems inside newroot otherwise aufs won't work properly
-mkdir -p /newroot/run
-mount -t tmpfs -o mode=0755,nosuid,nodev tmpfs /newroot/run
-mkdir -p /newroot/.data /newroot/.squashfs /newroot/.root
-mount --move /rw /newroot/.data
-mount --move /squashfs /newroot/.squashfs
-mount --move /mnt /newroot/.root
-mkdir -p /newroot/run/initramfs/bin /newroot/run/initramfs/sbin
-cp -P /bin/busybox /bin/sh /newroot/run/initramfs/bin/
-cp -P /bin/shutdown /newroot/run/initramfs/
+  # move backed filesystems inside newroot otherwise aufs won't work properly
+  mkdir -p /newroot/run
+  mount -t tmpfs -o mode=0755,nosuid,nodev tmpfs /newroot/run
+  mkdir -p /newroot/.data /newroot/.squashfs /newroot/.root
+  mount --move /rw /newroot/.data
+  mount --move /squashfs /newroot/.squashfs
+  mount --move /mnt /newroot/.root
+  mkdir -p /newroot/run/initramfs/bin /newroot/run/initramfs/sbin
+  cp -P /bin/busybox /bin/sh /newroot/run/initramfs/bin/
+  cp -P /bin/shutdown /newroot/run/initramfs/
+fi
 
 INIT_ARGS=`cat /proc/cmdline`
 

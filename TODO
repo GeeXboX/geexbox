@@ -1,0 +1,10 @@
+TODO for 2.0.1 release:
+~~~~~~~~~~~~~~~~~~~~~~~
+
+- add upgrade repo configuration
+- fix pandaboard sound issue
+- fix pandaboard analog audio playback
+- add script to automate panda/tegra2 sdcard creation
+- make omap3 build work again
+- add syslinux support for Macintosh in isohybrid images.
+- add missing Asian fonts (extra package)
