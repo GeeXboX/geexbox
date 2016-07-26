@@ -1,0 +1,8 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+mkdir -p $INSTALL/firmware/acx/default
+cp -P $PKG_BUILD_DIR/* $INSTALL/firmware/acx/default

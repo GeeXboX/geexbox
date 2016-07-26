@@ -1,0 +1,5 @@
+#! /bin/sh
+
+[ "$1" = remove ] || kernel_version=$(readlink /lib/modules/latest)
+
+depmod -a $kernel_version

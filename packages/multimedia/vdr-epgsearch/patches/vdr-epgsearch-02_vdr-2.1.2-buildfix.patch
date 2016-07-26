@@ -1,0 +1,14 @@
+--- vdr-epgsearch-1.0.1/uservars.h.org	2014-02-15 20:53:56.088264044 +0100
++++ vdr-epgsearch-1.0.1/uservars.h	2014-02-15 20:55:05.036261989 +0100
+@@ -538,7 +538,11 @@
+     cVideodirVar() : cInternalVar("videodir") {}
+     string Evaluate(const cEvent*, bool escapeStrings = false)
+ 	{
++#if APIVERSNUM >= 20103
++	    return cVideoDirectory::Name();
++#else
+ 	    return VideoDirectory;
++#endif
+ 	}
+ };
+ 

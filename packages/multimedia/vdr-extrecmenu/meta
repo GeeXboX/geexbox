@@ -1,0 +1,12 @@
+PKG_NAME=vdr-extrecmenu
+PKG_URL_PROTO=git
+PKG_URL_REV="c10ed8a"
+PKG_VERSION="1.2.4"
+PKG_URL="git://projects.vdr-developer.org/vdr-plugin-extrecmenu.git"
+PKG_REV=1
+PKG_BUILD_DEPENDS="toolchain"
+PKG_RUN_DEPENDS="$TARGET_LIBC vdr"
+PKG_PRIORITY=optional
+PKG_SECTION=multimedia
+PKG_SHORTDESC="VDR -- extrecmenu plugin"
+PKG_LONGDESC="vdr-extrecmenu is a plugin for VDR, the Video Disk Recorder."

@@ -1,0 +1,11 @@
+PKG_NAME=libxcb
+PKG_VERSION=1.11
+PKG_URL="$XORG_SRCS/xcb/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
+PKG_REV=1
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_BUILD_DEPENDS="toolchain libpthread-stubs xcb-proto libxslt"
+PKG_DEPENDS="libXau libXdmcp"
+PKG_PRIORITY=optional
+PKG_SECTION=x11
+PKG_SHORTDESC="X C Binding"
+PKG_LONGDESC="This package contains the library files needed to run software using libxcb, the X C Binding. The XCB library provides an interface to the X Window System protocol, designed to replace the Xlib interface."

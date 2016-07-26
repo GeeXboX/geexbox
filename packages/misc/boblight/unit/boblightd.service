@@ -1,0 +1,11 @@
+[Unit]
+Description=Boblightd service
+
+[Service]
+Environment=HOME=/root
+ExecStart=/usr/bin/boblightd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

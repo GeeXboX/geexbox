@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+mkdir -p objdir-target
+cd objdir-target
+do_configure \
+  --disable-documentation
+
+sed -i "s|wayland_scanner = \$(top_builddir)/wayland-scanner|wayland_scanner = $ROOT/$TOOLCHAIN/bin/wayland-scanner|" Makefile
+
+make
+make_install

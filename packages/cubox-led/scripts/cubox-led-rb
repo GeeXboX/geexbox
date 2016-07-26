@@ -1,9 +1,0 @@
-#!/bin/sh
-
-a=`pidof xbmc.bin`
-while [ -z "$a" ] ; do
-  sleep 1
-  a=`pidof xbmc.bin`
-done
-sleep 5
-echo !RUNNING > /sys/class/leds/!NAME/trigger

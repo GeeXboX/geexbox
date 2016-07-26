@@ -1,0 +1,26 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_install usr/bin/
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/snd-device-switch $INSTALL/usr/bin
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/snd-device-list $INSTALL/usr/bin
+
+do_install usr/lib/*.so*
+do_install usr/lib/pulse-2.0
+do_install usr/lib/pulseaudio/*.so*
+
+do_install etc/dbus-1/system.d/pulseaudio-system.conf
+
+do_install etc/pulse/client.conf
+do_install etc/pulse/daemon.conf
+do_install etc/pulse/system.pa
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/default.pa $INSTALL/etc/pulse
+
+do_install usr/share/pulseaudio
+
+mkdir -p $INSTALL/etc/udev/rules.d
+cp src/modules/alsa/mixer/profile-sets/*.rules $INSTALL/etc/udev/rules.d

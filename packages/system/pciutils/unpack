@@ -1,0 +1,9 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+sed -i 's:PREFIX=.*:PREFIX=/usr:' $PKG_BUILD_DIR/Makefile
+sed -i 's:SBINDIR=$(PREFIX)/sbin.*:SBINDIR=$(PREFIX)/bin:' $PKG_BUILD_DIR/Makefile
+sed -i 's:SHAREDIR=$(PREFIX)/share.*:SHAREDIR=$(PREFIX)/share/misc:' $PKG_BUILD_DIR/Makefile

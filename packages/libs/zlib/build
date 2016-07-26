@@ -1,0 +1,34 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+export MAKEFLAGS=-j1
+
+cd $PKG_BUILD_DIR
+
+setup_toolchain host
+./configure --prefix=/usr
+make
+make_install toolchain
+
+# remove shared library
+rm -f .install/usr/lib/libz.so*
+make clean
+rm -rf objdir-host
+mkdir objdir-host
+mv .install objdir-host
+
+setup_toolchain target
+./configure --prefix=/usr \
+            --shared \
+            --uname=Linux
+
+make
+make_install
+
+# remove static library
+# rm -f .install/usr/lib/libz.a
+rm -rf objdir-target
+mkdir objdir-target
+mv .install* objdir-target

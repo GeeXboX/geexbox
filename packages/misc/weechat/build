@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+export LDFLAGS="$LDFLAGS -ldl -lintl"
+
+do_cmake_build \
+    -DENABLE_PERL=off
+

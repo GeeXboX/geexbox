@@ -1,0 +1,13 @@
+PKG_NAME=ImageMagick
+PKG_VERSION=6.9.1-0
+PKG_URL="http://www.imagemagick.org/download/ImageMagick-${PKG_VERSION}.tar.bz2"
+PKG_REV=1
+PKG_DEPENDS="zlib libpng libjpeg-turbo tiff"
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_USE="xorg"
+PKG_PRIORITY=optional
+PKG_SECTION=libs
+PKG_SHORTDESC="image manipulation library"
+PKG_LONGDESC="ImageMagick is a software suite to create, edit, and compose bitmap images. It can read, convert and write images in a variety of formats (over 100)."
+PKG_SECTION=misc

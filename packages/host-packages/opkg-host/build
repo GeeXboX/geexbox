@@ -1,0 +1,38 @@
+#! /bin/sh
+
+. config/options
+
+build_package () {
+  $SCRIPTS/unpack $PKG_PARENT
+
+  cd $BUILD/${PKG_PARENT}-${PKG_VERSION}
+  setup_toolchain host
+
+  CC=$LOCAL_CC \
+  ./configure --disable-dependency-tracking \
+	      --enable-static \
+	      --disable-shared \
+	      --disable-curl \
+	      --disable-ssl-curl \
+	      --enable-sha256 \
+	      --disable-pathfinder \
+	      --disable-openssl \
+	      --disable-gpg \
+	      --with-opkglibdir=/var/lib
+
+  make clean
+  make
+
+  # copy directly to $cache_dir
+  mkdir -p $2/bin
+  cp src/opkg-cl $2/bin/opkg
+
+  make clean
+}
+
+# perform real build or restore cached copy
+do_cached_build $1
+
+# special: install to toolchain immediately
+INSTALL=$ROOT/$TOOLCHAIN
+do_install bin

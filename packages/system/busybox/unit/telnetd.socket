@@ -1,0 +1,11 @@
+[Unit]
+Description=Telnet socket
+ConditionPathExists=/run/geexbox/network/telnetd
+After=network-link.service
+
+[Socket]
+ListenStream=23
+Accept=yes
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_install sbin
+do_install etc/pcmcia
+
+mkdir -p $INSTALL/etc/udev/rules.d
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/70_pcmcia.rules $INSTALL/etc/udev/rules.d

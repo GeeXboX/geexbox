@@ -1,5 +1,0 @@
-#!/bin/sh
-
-. config/options
-
-cp $PACKAGES/$1/config/Config $BUILD/$1*/

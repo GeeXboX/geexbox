@@ -1,0 +1,12 @@
+#! /bin/sh
+
+if [ ! "$1" = remove ]; then
+  if [ -e /dev/disk/by-label/BOOT ] && grep -q "^\S* /boot " /etc/mtab ; then
+    echo "Unmounting boot partition ..."
+    umount /boot || true
+  fi
+
+  kernel_version=$(readlink /lib/modules/latest)
+fi
+
+depmod -a $kernel_version

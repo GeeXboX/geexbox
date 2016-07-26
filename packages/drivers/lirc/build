@@ -1,0 +1,25 @@
+#!/bin/sh
+
+. config/options
+
+$SCRIPTS/build linux
+
+if [ "$DEBUG" = yes ]; then
+  DEBUG_CONFIG="--enable-debug"
+else
+  DEBUG_CONFIG="--disable-debug"
+fi
+
+export MAKEFLAGS=-j1
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_configure \
+            --without-x \
+            --with-driver=userspace \
+            --with-kerneldir=$(kernel_path) \
+            $DEBUG_CONFIG \
+
+make
+make_install

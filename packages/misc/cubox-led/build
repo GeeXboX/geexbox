@@ -1,0 +1,51 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+mkdir -p $ROOT/$BUILD/$PKG_NAME-$PKG_VERSION/.install/usr/bin
+
+cd $PKG_BUILD_DIR
+
+case $TARGET_MACHINE in
+  cuboxi)
+    led_name=imx6:red:front
+    led_starting=timer
+    led_running=default-on
+    led_bright="echo 255"
+    led_dark="echo 3"
+    ;;
+  cubox)
+    led_name=cubox:red:health
+    led_starting=timer
+    led_running=rc
+    led_bright="#echo 255"
+    led_dark="#echo 255"
+    ;;
+  cubie*)
+    led_name=blue:ph21:led2
+    led_starting=timer
+    led_running=none
+    led_bright="#echo 255"
+    led_dark="#echo 255"
+    ;;
+  pandaboard)
+    led_name=pandaboard::status1
+    led_starting=heartbeat
+    led_running=none
+    led_bright="#echo 255"
+    led_dark="#echo 255"
+    ;;
+esac
+
+if [ -n "$led_name" ] ; then
+  cp $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/cubox-led* .install/usr/bin
+  sed -i -e "s/!NAME/${led_name}/g" \
+         -e "s/!STARTING/${led_starting}/g" \
+         -e "s/!RUNNING/${led_running}/g" \
+         -e "s/!BRIGHT/${led_bright}/g" \
+         -e "s/!DARK/${led_dark}/g" \
+         -e "s/!MEDIA_CENTER/${MEDIA_CENTER_FRONTEND}.bin/g" \
+         .install/usr/bin/cubox-led*
+fi

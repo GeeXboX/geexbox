@@ -1,0 +1,19 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+make \
+  SYS=posix \
+  CRYPTO="OPENSSL" \
+  CROSS_COMPILE="$TARGET_PREFIX" \
+  XCFLAGS="$CFLAGS" \
+  XLDFLAGS="$LDFLAGS" \
+
+export MAKEFLAGS=-j1
+make_install
+
+# remove static library
+rm -f .install/usr/lib/librtmp.a

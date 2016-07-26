@@ -1,9 +1,0 @@
-#!/bin/sh
-
-. config/options
-
-cd $BUILD/$1*
-
-do_install usr/bin
-cp $ROOT/$PACKAGES/$1/scripts/dropbearkeygen $INSTALL/usr/bin
-mkdir -p $INSTALL/etc/dropbear

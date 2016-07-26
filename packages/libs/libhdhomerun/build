@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+make CC="$CC" STRIP="$STRIP"
+
+mkdir -p .install/usr/lib .install/usr/bin .install/usr/include/libhdhomerun
+cp *.h .install/usr/include/libhdhomerun
+
+cp libhdhomerun.so .install/usr/lib/libhdhomerun.so
+cp hdhomerun_config .install/usr/bin/hdhomerun_config

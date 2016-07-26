@@ -1,6 +1,0 @@
-#!/bin/sh
-
-. config/options
-
-mkdir $INSTALL/sbin
-cp -P $PACKAGES/$1/scripts/bootchartd $INSTALL/sbin

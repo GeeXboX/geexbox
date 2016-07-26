@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+STAMP=$STAMPS/$1/build
+
+for f in console linuxrc nosystem ro rw; do
+  test $ROOT/$PACKAGES/$PKG_SECTION/$PKG_NAME/scripts/$f -nt $STAMP && rm -f $STAMP
+done
+
+test $ROOT/$PACKAGES/$PKG_SECTION/$PKG_NAME/config/video -nt $STAMP && rm -f $STAMP
+
+exit 0

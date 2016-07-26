@@ -1,0 +1,11 @@
+PKG_NAME=libevent
+PKG_VERSION=2.0.21-stable
+PKG_URL="$SFNET_SRCS/levent/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+PKG_REV=1
+PKG_DEPENDS="$TARGET_LIBC"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_DEV_CONFLICTS="libev"
+PKG_PRIORITY=optional
+PKG_SECTION=libs
+PKG_SHORTDESC="The libevent API provides a mechanism to execute a callback function "
+PKG_LONGDESC="The libevent API provides a mechanism to execute a callback function when a specific event occurs on a file descriptor or after a timeout has been reached."

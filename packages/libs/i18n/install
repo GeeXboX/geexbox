@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+mkdir -p $INSTALL/etc
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/lang.funcs $INSTALL/etc
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/lang.conf $INSTALL/etc
+
+if [ -n "$DEFAULT_LOCALE" ]; then
+  DEFAULT_LANGUAGE=$(echo $DEFAULT_LOCALE | cut -c 1-2)
+  sed -i -e "s/DEFAULT_LANGUAGE=.*/DEFAULT_LANGUAGE=$DEFAULT_LANGUAGE/g" $INSTALL/etc/lang.conf
+fi

@@ -17,7 +17,7 @@ refresh_cfg() {
 if [ -n "$1" ]; then
   CFG_FILENAME="${DEFCONFIG_PATH}/$1.conf"
 
-  if [ -n ! -f "$CFG_FILENAME" ]; then
+  if [ ! -f "$CFG_FILENAME" ]; then
     echo "File not found: $CFG_FILENAME"
     exit 1
   fi
@@ -29,6 +29,8 @@ if [ -r "$DOT_CONFIG" ]; then
   echo "saved current .config in $BACKUP_CONFIG"
   trap "cp $BACKUP_CONFIG $DOT_CONFIG; rm -f $BACKUP_CONFIG" INT TERM EXIT
 fi
+
+touch VERSION
 
 if [ -n "$CFG_FILENAME" ]; then
   refresh_cfg $CFG_FILENAME

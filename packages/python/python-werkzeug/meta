@@ -1,0 +1,10 @@
+PKG_NAME=python-werkzeug
+PKG_VERSION=0.10.1
+PKG_URL="https://pypi.python.org/packages/source/W/Werkzeug/Werkzeug-$PKG_VERSION.tar.gz"
+PKG_REV=1
+PKG_BUILD_DEPENDS="toolchain python-distribute"
+PKG_DEPENDS="Python"
+PKG_PRIORITY=optional
+PKG_SECTION=python
+PKG_SHORTDESC="Werkzeug python framework"
+PKG_LONGDESC="A python framework for handling Web applications as WSGI applications"

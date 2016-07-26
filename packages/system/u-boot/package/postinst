@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -e /dev/disk/by-label/BOOT ] && grep -q "^\S* /boot " /etc/mtab ; then
+  echo "Unmounting boot partition ..."
+  umount /boot || true
+fi
+
+depmod -A $(readlink /lib/modules/latest)

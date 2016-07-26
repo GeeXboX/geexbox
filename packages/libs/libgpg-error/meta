@@ -1,0 +1,10 @@
+PKG_NAME=libgpg-error
+PKG_VERSION=1.20
+PKG_URL="ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-${PKG_VERSION}.tar.bz2"
+PKG_REV=1
+PKG_BUILD_DEPENDS="toolchain"
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_PRIORITY=standard
+PKG_SECTION=libs
+PKG_SHORTDESC="library for common error values and messages in GnuPG components"
+PKG_LONGDESC="Library that defines common error values for all GnuPG components.  Among these are GPG, GPGSM, GPGME, GPG-Agent, libgcrypt, pinentry, SmartCard Daemon and possibly more in the future."

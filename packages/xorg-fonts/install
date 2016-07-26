@@ -1,8 +1,0 @@
-#!/bin/sh
-
-. config/options
-
-cd $BUILD/$1*
-
-do_install usr/share/X11/fonts/misc
-cp $ROOT/$PACKAGES/$1/config/fonts.alias $INSTALL/$XORG_PATH_FONTS/misc

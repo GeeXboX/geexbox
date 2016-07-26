@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+sed -i "s%#mysql_config = /usr/local/bin/mysql_config%mysql_config = $ROOT/$TOOLCHAIN/bin/mysql_config%" site.cfg
+sed -i "s%LIB_P%$LIB_PREFIX%" setup_posix.py
+do_python_make_cross -O1 --prefix /usr --root .install
+
+do_python_strip

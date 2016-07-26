@@ -1,0 +1,29 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+$SCRIPTS/unpack $PKG_PARENT
+
+cd $BUILD/${PKG_PARENT}-${PKG_VERSION}
+
+mkdir -p objdir-host
+cd objdir-host
+
+do_configure host \
+         --target=$TARGET_NAME \
+         --datadir=$ROOT/$TOOLCHAIN/share
+
+make
+make_install toolchain
+
+sed -i .install/usr/bin/libtoolize -e "s:^prefix=.*\$:prefix=$ROOT/$TOOLCHAIN:"
+
+cp -R .install/$ROOT/$TOOLCHAIN/share .install/usr/
+# remove file already present in m4 package
+rm -f .install/usr/share/info/dir
+
+mkdir -p $ROOT/$PKG_BUILD_DIR
+rm -rf $ROOT/$PKG_BUILD_DIR/.install
+mv .install $ROOT/$PKG_BUILD_DIR

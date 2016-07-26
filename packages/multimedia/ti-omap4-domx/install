@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_install usr/lib/libdomx.so*
+do_install usr/lib/libmmosal.so*
+do_install usr/lib/libOMX*.so*
+
+mkdir -p $INSTALL/etc
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/syslink.conf $INSTALL/etc

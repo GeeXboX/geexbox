@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_install usr/lib/lib*.so*
+
+if pkg_uses $1 devtools; then
+  do_install usr/bin
+else
+  do_install usr/bin/pvrsrvinit
+fi
+
+cp -P $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/do-pvr-init $INSTALL/usr/bin
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/powervr.ini $INSTALL/etc
+exit 0

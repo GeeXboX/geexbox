@@ -1,0 +1,10 @@
+#!/bin/sh
+
+a=`pidof !MEDIA_CENTER`
+while [ -z "$a" ] ; do
+  sleep 1
+  a=`pidof !MEDIA_CENTER`
+done
+sleep 5
+echo !RUNNING > /sys/class/leds/!NAME/trigger
+!DARK > /sys/class/leds/!NAME/brightness

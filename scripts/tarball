@@ -4,7 +4,13 @@
 
 $SCRIPTS/checkdeps build || exit 1
 
-rm -rf $TBZ2_NAME $TARBALL_DIR
+if [ "$TTC_XZ" = yes ] ; then
+  TARBALL_NAME=$XZ_NAME
+else
+  TARBALL_NAME=$TBZ2_NAME
+fi
+
+rm -rf $TARBALL_NAME $TARBALL_DIR
 mkdir -p $TARBALL_DIR
 
 [ "$NOROOTFS" = 1 ] || $SCRIPTS/rootfs
@@ -22,10 +28,14 @@ fi
 if [ -n "$MACHINE_UBOOT_CONFIG" ]; then
   $SCRIPTS/installdev u-boot
   mkdir -p $TARBALL_DIR/boot
-  cp -P $ROOT/$TOOLCHAIN/share/u-boot/* $TARBALL_DIR/boot
+  cp -PR $ROOT/$TOOLCHAIN/share/u-boot/* $TARBALL_DIR/boot
 fi
 
-tar cpjf $TBZ2_NAME -C $TARBALL_DIR .
+if [ "$TARGET_MACHINE" = utilite ] ; then
+  cp -P $SCRIPTS/install-utilite $TARBALL_DIR/bin/install-utilite
+fi
+
+tar cpaf $TARBALL_NAME -C $TARBALL_DIR .
 
 rm -rf $TARBALL_DIR
 

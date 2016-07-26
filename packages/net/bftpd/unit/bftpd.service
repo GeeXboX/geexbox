@@ -1,0 +1,10 @@
+[Unit]
+Description=FTP Server
+ConditionPathExists=/run/geexbox/network/ftpd
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/bftpd -D -c /etc/bftpd.conf
+
+[Install]
+WantedBy=multi-user.target

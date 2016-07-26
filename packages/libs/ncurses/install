@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR/objdir-target
+
+do_install usr/lib/*.so*
+
+pkg_uses $1 terminfo && do_install usr/share
+
+mkdir -p $INSTALL/usr/share/terminfo/l
+TERMINFO=$INSTALL/usr/share/terminfo \
+  ../objdir-host/progs/tic -xe linux ../misc/terminfo.src

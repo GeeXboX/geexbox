@@ -1,0 +1,40 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+do_autoconf
+
+if [ "$TARGET_MACHINE" = cubox ]; then
+  EXTRA_CFG="$EXTRA_CFG --enable-cubox --with-tda995x-toolkit-path=$(kernel_path)/drivers/video/dovefb/nxp_hdmi"
+else
+  EXTRA_CFG="$EXTRA_CFG --disable-cubox"
+fi
+
+if [ "$TARGET_MACHINE" = raspberrypi ] || [ "$TARGET_MACHINE" = raspberrypi2 ]; then
+  EXTRA_CFG="$EXTRA_CFG --enable-rpi --with-rpi-include-path=$LIB_PREFIX/include --with-rpi-lib-path=$LIB_PREFIX/lib"
+  local_cxxflags="-I$LIB_PREFIX/include/interface/vcos/pthreads -I$LIB_PREFIX/include/interface/vmcs_host/linux"
+else
+  EXTRA_CFG="$EXTRA_CFG --disable-rpi"
+fi
+
+if [ "$TARGET_PLATFORM" = imx6 ]; then
+  EXTRA_CFG="$EXTRA_CFG --enable-imx6"
+else
+  EXTRA_CFG="$EXTRA_CFG --disable-imx6"
+fi
+
+if [ "$TARGET_PLATFORM" = exynos5 ]; then
+  EXTRA_CFG="$EXTRA_CFG --enable-exynos"
+else
+  EXTRA_CFG="$EXTRA_CFG --disable-exynos"
+fi
+
+
+do_configure --disable-option-checking $EXTRA_CFG
+
+make
+make_install
+

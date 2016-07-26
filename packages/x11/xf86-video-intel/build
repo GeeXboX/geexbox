@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+xorg_drv_configure_prepend
+
+do_autoconf
+do_configure \
+            --enable-dri \
+            --enable-kms \
+            --disable-xvmc \
+            --enable-sna \
+            --disable-debug \
+            --with-xorg-module-dir=$XORG_PATH_MODULES \
+            --disable-dri3
+
+make
+make_install

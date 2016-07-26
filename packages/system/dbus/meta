@@ -1,0 +1,13 @@
+PKG_NAME=dbus
+PKG_VERSION=1.10.0
+PKG_URL="http://dbus.freedesktop.org/releases/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+PKG_REV=1
+PKG_DEPENDS="expat systemd"
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_USE="xorg"
+PKG_DEPENDS_xorg="libX11"
+PKG_PRIORITY=required
+PKG_SECTION=system
+PKG_SHORTDESC="simple interprocess messaging system"
+PKG_LONGDESC="D-Bus is a message bus, used for sending messages between applications. This package contains the D-Bus daemon and related utilities and the dbus shared library."

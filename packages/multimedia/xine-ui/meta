@@ -1,0 +1,15 @@
+PKG_NAME=xine-ui
+PKG_VERSION=0.99.8
+PKG_URL="$SFNET_SRCS/xine/xine-ui/${PKG_VERSION}/xine-ui-${PKG_VERSION}.tar.xz"
+#PKG_VERSION=0.99.7-hg20120217
+#PKG_URL="http://ppa.launchpad.net/yavdr/main/ubuntu/pool/main/x/xine-ui/xine-ui_0.99.7~hg20120217.orig.tar.gz"
+PKG_REV=1
+PKG_DEPENDS="xine-lib libpng libjpeg-turbo libXxf86vm libXv libXext libX11 libXau libxcb zlib libXt"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_USE="xorg uclibc vdr fb"
+PKG_DEPENDS_uclibc="libiconv gettext"
+PKG_PRIORITY=optional
+PKG_SECTION=multimedia
+PKG_SHORTDESC="the xine video/media player, user interface"
+PKG_LONGDESC="This is an X11 based GUI for the libxine video player library. It provides xine, a skin based media player that can play all the audio/video formats that libxine supports. Currently, this includes MPEG1/2, some AVI and Quicktime files, some network streaming methods and disc based media. A more complete list can be found on http://xinehq.de/index.php/features/."

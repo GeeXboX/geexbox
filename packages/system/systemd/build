@@ -1,0 +1,119 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+if [ ! -e ./configure ] || grep -qv "ln --relative" configure.ac ; then
+  # workaround for hosts that don't support 'ln --relative'
+  # we use a wrapper script to emulate this option
+  sed -i -e "s%ln --relative%ln%" configure.ac
+  sed -i -e "s%\$(LN_S) --relative%${PWD}/ln-relative%" Makefile.am
+
+  ln -sf $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/ln-relative
+
+  [ -e ./autogen.sh ] && ./autogen.sh || do_autoconf
+fi
+
+if [ $PKG_VERSION -lt 217 ]; then
+EXTRA_CONFIG="\
+            --disable-gtk-doc \
+            --disable-tcpwrap \
+            --enable-gudev \
+            --enable-readahead \
+            --enable-introspection=no \
+            --with-firmware-path=/firmware \
+            --with-dbusinterfacedir=/usr/share/dbus-1/interfaces \
+"
+else
+EXTRA_CONFIG="\
+            --disable-utmp \
+            --disable-gnuefi \
+"
+fi
+
+export ac_cv_func_malloc_0_nonnull=yes
+export ac_cv_path_KMOD="/usr/bin/kmod"
+GCC_NO_LTO=1 GCC_NO_GOLD=1 \
+do_configure \
+            --disable-dbus \
+            --disable-timesyncd \
+            --disable-resolved \
+            --disable-networkd \
+            --disable-libiptc \
+            --disable-kdbus \
+            --disable-tests \
+            --disable-split-usr \
+            --disable-selinux \
+            --disable-ima \
+            --disable-pam \
+            --disable-audit \
+            --disable-acl \
+            --disable-libcryptsetup \
+            --disable-binfmt \
+            --disable-hostnamed \
+            --disable-timedated \
+            --disable-localed \
+            --disable-logind \
+            --disable-coredump \
+            --disable-vconsole \
+            --disable-xz \
+            --disable-quotacheck \
+            --disable-manpages \
+            --disable-qrencode \
+            --disable-microhttpd \
+            --disable-bootchart \
+            --without-python \
+            --with-dbuspolicydir=/etc/dbus-1/system.d \
+            --with-dbussessionservicedir=/usr/share/dbus-1/services \
+            --with-dbussystemservicedir=/usr/share/dbus-1/system-services \
+            --with-sysvinit-path= \
+            --with-sysvrcnd-path= \
+            --with-pamlibdir= \
+            --with-rootprefix= \
+            --with-rootlibdir=/lib \
+            $EXTRA_CONFIG
+
+export MAKEFLAGS=-j1
+make
+make_install
+
+SYSTEMD=.install/lib/systemd
+SYSUNITS=$SYSTEMD/system
+
+# we don't care about utmp (it's not even supported by our libc)
+if [ $PKG_VERSION -lt 217 ]; then
+  rm -f $SYSTEMD/systemd-update-utmp
+  rm -f $SYSUNITS/systemd-update-utmp.service
+  rm -f $SYSUNITS/sysinit.target.wants/systemd-update-utmp.service
+  rm -f $SYSUNITS/systemd-update-utmp-runlevel.service
+  rm -f $SYSUNITS/systemd-update-utmp-shutdown.service
+  rm -f $SYSUNITS/shutdown.target.wants/systemd-update-utmp-shutdown.service
+  rm -f $SYSUNITS/runlevel?.target.wants/systemd-update-utmp-runlevel.service
+fi
+
+# boot to multi-user.target as fallback default
+ln -sf multi-user.target $SYSUNITS/default.target
+
+# we don't (yet) have proper user/groups management...
+sed -i -e 's/, *GROUP=\"[^\"]*\"//g' .install/lib/udev/rules.d/*
+
+
+# fixup devpackage: In our toolchain tree, /lib will go to systroot. Therefore
+#                   we have to adjust the links in /usr/lib accordingly. Note
+#                   that most of these links are not valid on the rootfs and
+#                   should *not* be installed there.
+#
+#                   systemd-XXXXX are legacy libs and may not be present
+#                   gudev-1.0 can reside in /lib or /usr/lib or may not exist
+systemd_libs="systemd udev gudev-1.0 systemd-daemon systemd-id128 systemd-journal"
+for i in $systemd_libs; do
+  if [ -e .install/lib/lib${i}.so.0 ]; then
+    ln -sf ../../../lib/lib${i}.so.0 .install/usr/lib/lib${i}.so
+  elif [ -e .install/lib/lib${i}.so.1 ]; then
+    ln -sf ../../../lib/lib${i}.so.1 .install/usr/lib/lib${i}.so
+  elif [ -e .install/usr/lib/lib${i}.so.0 ]; then
+    ln -sf lib${i}.so.0 .install/usr/lib/lib${i}.so
+  fi
+done

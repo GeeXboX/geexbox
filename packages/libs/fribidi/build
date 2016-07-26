@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+export local_cflags="-DFRIBIDI_CHUNK_SIZE=4080"
+
+do_configure \
+            --disable-debug \
+            --enable-malloc \
+            --enable-charsets \
+            --without-glib \
+
+make
+make_install
+cp -f $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/$1-config .install/usr/bin/$1-config

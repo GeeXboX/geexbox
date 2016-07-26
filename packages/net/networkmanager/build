@@ -1,0 +1,37 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+cd $PKG_BUILD_DIR
+export ac_cv_file__etc_fedora_release=no
+export ac_cv_file__etc_redhat_release=no
+export ac_cv_file__etc_gentoo_release=no
+export ac_cv_file__etc_SuSE_release=no
+export ac_cv_file__etc_mandriva_release=no
+
+do_configure --enable-ifupdown                                \
+             --with-crypto=gnutls                             \
+             --disable-more-warnings                          \
+             --with-dhclient=/usr/sbin/dhclient               \
+             --with-iptables=/usr/sbin/iptables               \
+             --with-tests                                     \
+             --with-systemdsystemunitdir=/lib/systemd/system  \
+             --enable-ppp                                     \
+             --disable-qt
+             
+make
+make_install
+
+# copy dispatcher scripts
+mkdir -p .install/etc/NetworkManager/dispatcher.d
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/ntpd.sh .install/etc/NetworkManager/dispatcher.d
+chmod 755 .install/etc/NetworkManager/dispatcher.d/*
+
+# create empty config to silence error messages
+touch .install/etc/NetworkManager/NetworkManager.conf
+
+# copy startup helper scripts
+mkdir -p .install/etc/nm
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/* .install/etc/nm
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/nm* .install/usr/bin

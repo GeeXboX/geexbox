@@ -1,9 +1,0 @@
-PKG_NAME=util-macros
-PKG_VERSION=1.17
-PKG_URL="$XORG_SRCS/util/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
-PKG_REV=1
-PKG_BUILD_DEPENDS="toolchain"
-PKG_PRIORITY=optional
-PKG_SECTION=x11
-PKG_SHORTDESC="X util-macros"
-PKG_LONGDESC="X Window System utility macros for development"

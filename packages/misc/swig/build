@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+export PCRE_CONFIG=$ROOT/$TOOLCHAIN/bin/pcre-config-host
+do_configure host \
+	--with-pcre-prefix=$ROOT/$TOOLCHAIN \
+	--without-alllang \
+	--without-x
+
+# Set default library location to our toolchain directory 
+sed -e "s%NewString(SWIG_LIB)%NewString(\"$ROOT/$TOOLCHAIN/share/swig/$PKG_VERSION\")%" -i Source/Modules/main.cxx
+
+make
+make_install toolchain

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+mkdir -p $INSTALL/etc
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/audio $INSTALL/etc
+
+[ "$TARGET_PLATFORM" = omap4 ] && \
+  sed -i 's/^SOUNDCARD_MODE=.*$/SOUNDCARD_MODE="hdmi"/' $INSTALL/etc/audio
+
+exit 0

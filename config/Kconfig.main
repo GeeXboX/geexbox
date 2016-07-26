@@ -98,11 +98,12 @@ config TOOLCHAIN_codesourcery
 
 config TOOLCHAIN_linaro
   bool "Linaro"
-  depends on TARGET_ARCH_arm
+  depends on ( TARGET_ARCH_arm || TARGET_ARCH_arm64 )
+
 
 config TOOLCHAIN_linaro_next
   bool "Linaro next"
-  depends on TARGET_ARCH_arm
+  depends on ( TARGET_ARCH_arm || TARGET_ARCH_arm64 )
 
 endchoice
 
@@ -220,6 +221,12 @@ config OPT_DYNAMIC_SYSROOT
   help
    Rebuild the sysroot from scratch at each package compilation. Makes build
    slower but helps to catch wrong depends between packages.
+   
+config OPT_DEVROOTFS
+  bool "Rootfs for debug"
+  default n
+  help
+   Create a rootfs with unstripped libs
 
 config OPT_EATMYDATA
   bool "Disable fsync() during build"
@@ -304,6 +311,19 @@ config OPT_TARGET_SDCARD_GEN
 config OPT_TARGET_TARBALL
   bool "Flat rootfs tarball"
   default n
+
+choice TARGET_TARBALL_COMPRESSION
+  prompt "Compression method for TARBALL"
+  depends on OPT_TARGET_TARBALL
+  default OPT_TTC_XZ
+
+config OPT_TTC_TARBZ
+  bool "tar.bz2"
+
+config OPT_TTC_XZ
+  bool "xz"
+
+endchoice
 
 config OPT_TARGET_EXT2FS
   bool "ext2 filesystem image"
@@ -421,7 +441,7 @@ config OMAP_DISPLAY_DPI
 endchoice
 
 menu "Raspberry Pi settings"
-  depends on ( TARGET_PLATFORM_arm_bcm2708 )
+  depends on ( TARGET_PLATFORM_arm_bcm2708 || TARGET_PLATFORM_arm_bcm2709 )
 
 choice RPI_SDTV_MODE
   prompt "SDTV video mode"
@@ -562,6 +582,12 @@ config NB_CONNMAN
   help
     Intel Connection Manager daemon
 
+config NB_NM
+  bool "NetworkManager"
+  select PKG_networkmanager
+  help
+    Network Manager daemon
+
 config NB_UDHCPC
   bool "udhcpc"
   select PKG_udhcpc
@@ -606,6 +632,12 @@ config SSH_SERVER
   bool "SSH server"
   depends on USE_network
   select PKG_dropbear
+  default n
+
+config OPT_SSH_SERVER
+  bool "Start at boot"
+  depends on SSH_SERVER
+  default y if START_SERVICES
   default n
 
 config FTP_SERVER
@@ -770,6 +802,11 @@ config OPT_EGL_PROVIDER
   default "vivante" if EGL_PROVIDER_VIVANTE
   default "vc" if EGL_PROVIDER_VC
 
+config OPT_GLX_PROVIDER
+  string
+  default "mesa" if GLX_PROVIDER_MESA
+  default "imx6" if GLX_PROVIDER_IMX6
+  
 config OPT_GLES_PROVIDER
   string
   default "mesa" if GLES_PROVIDER_MESA
@@ -800,6 +837,7 @@ config OPT_OMAX_PROVIDER
 config OPT_NETWORK_BACKEND
   string
   default "connman" if NB_CONNMAN
+  default "networkmanager" if NB_NM
   default "udhcpc" if NB_UDHCPC
   default "none" if NB_NONE
 

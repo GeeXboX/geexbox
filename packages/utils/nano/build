@@ -1,0 +1,34 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_configure \
+  --enable-largefile \
+  --disable-nls \
+  --disable-debug \
+  --disable-extra \
+  --disable-browser \
+  --disable-help \
+  --disable-justify \
+  --disable-mouse \
+  --disable-operatingdir \
+  --disable-speller \
+  --disable-tabcomp \
+  --disable-wrapping \
+  --disable-wrapping-as-root \
+  --enable-color \
+  --disable-multibuffer \
+  --enable-nanorc \
+  --disable-utf8 \
+  --enable-altrcname=/etc/nanorc \
+  --disable-glibtest \
+  --with-gnu-ld \
+
+make
+make_install
+
+# Fix regex problem in *.nanorc files by replacing "\<" and "\>" by "\b"
+sed -e "s/\\\</\\\b/g" -e "s/\\\>/\\\b/g" -i .install/usr/share/nano/*.nanorc

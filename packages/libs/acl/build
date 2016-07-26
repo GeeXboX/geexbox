@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+export CONFIG_SHELL=/bin/bash
+do_configure \
+            --libexecdir=/usr/lib \
+            --enable-gettext=no \
+
+make
+make_install
+chmod a+x $PWD/.install/usr/lib/lib*.so*

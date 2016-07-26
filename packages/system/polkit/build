@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_configure --disable-man-pages \
+             --disable-gtk-doc \
+             --disable-nls \
+             --disable-introspection \
+             --with-authfw=shadow \
+             --with-os-type=redhat \
+
+make
+make_install

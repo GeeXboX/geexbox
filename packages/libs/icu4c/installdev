@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. config/options
+
+require_cxx $1
+
+get_meta $1
+cd $PKG_BUILD_DIR/source
+
+do_installdev usr/include
+do_installdev usr/lib
+
+cd objdir-host
+do_installdev usr/include toolchain
+do_installdev usr/lib toolchain

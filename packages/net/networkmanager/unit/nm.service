@@ -1,0 +1,15 @@
+[Unit]
+Description=Create basic config for NetworkManager service
+After=syslog.target network-link.service
+ConditionPathExists=/run/geexbox/network/networkmanager
+Before=NetworkManager.service
+
+
+[Service]
+ExecStartPre=/usr/bin/nm-parse-configuration
+ExecStartPre=/usr/bin/nm-parse-configuration2
+ExecStart=-/bin/echo -e 'Starting configuration of network interface(s)'
+
+[Install]
+WantedBy=network.target
+Alias=networkmanager.service

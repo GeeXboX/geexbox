@@ -1,0 +1,13 @@
+PKG_NAME=busybox
+PKG_URL_REV="1~5c23f25"
+PKG_VERSION="1.24+${PKG_URL_REV}"
+PKG_URL="git://git.busybox.net/busybox"
+PKG_URL_PROTO=git
+PKG_REV=4
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_PRIORITY=required
+PKG_SECTION=system
+PKG_SHORTDESC="basic system utilities"
+PKG_LONGDESC="This package contains the essential basic system utilities and the system shell."
+

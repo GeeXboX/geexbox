@@ -1,0 +1,66 @@
+#!/bin/sh
+
+. /etc/pvr.conf
+
+#Turn on the TV
+if [ -c /dev/ttyACM0 ]; then
+  killall -9 libcec-daemon && systemctl stop libcec-daemon.service --force
+  echo 'on 0' | cec-client -s /dev/ttyACM0
+  systemctl start libcec-daemon.service
+fi
+
+chvt 4
+sync
+
+if [[ "$BACKEND" != vdr && "$BACKEND" != VDR ]]; then
+   exit 0
+fi
+
+[ ! -d /media/video ] && mkdir -p /media/video
+[ ! -d /external ] && mkdir -p /external
+
+PLUGINS=""
+for file in /etc/vdr/plugins.d/*; do
+  if [ -f "$file" ]; then
+    # plugins are enabled by default
+    PLUGIN=""
+    OPTIONS=""
+    INITCMD=""
+    ENABLED=yes
+    . $file
+    [ "$ENABLED" = yes ] && PLUGINS="$PLUGINS -P'$PLUGIN $OPTIONS'"
+    [ -n "$INITCMD" ] && eval $INITCMD
+  fi
+done
+
+[ -r /etc/locale.conf ] && export LANG=`cat /etc/locale.conf | cut -d= -f2`
+export DISPLAY=":0.0"
+
+# special for germany :
+[ "$LANG" = de_DE.UTF-8 ] && export VDR_CHARSET_OVERRIDE=”ISO-8859-15″
+
+canalisky="/etc/vdr/plugins/channelssky/channels.sky.conf"
+#[ $# -eq 0 ] && { echo "Usage: $0 filename"; }
+#[ ! -f "$canalisky" ] && { echo "Error: $0 file not found."; }
+
+if [ -s "$canalisky" ]; then
+   `mv /etc/vdr/plugins/channelssky/channels.sky.conf /etc/vdr/channels.conf`
+fi
+
+#sleep 10
+if dmesg | tail -n 250 | grep -i "error while loading driver" > /dev/null; then 
+   rmmod dvb-usb-af9035         
+   modprobe dvb-usb-af9035          
+   sleep 1                
+elif dmesg | tail -n 250 | grep -i "dvb_usb_af9035: probe of 1-2:1.0 failed with error -110" > /dev/null; then
+   rmmod dvb-usb-af9035
+   modprobe dvb-usb-af9035
+   sleep 1
+fi
+/bin/systemctl restart mixer.service                                            
+sleep 1       
+
+eval vdr -g /tmp -L /usr/lib/vdr/plugins --log=3 -p 6419 --vfat --no-kbd $PLUGINS -v /media/video -c /etc/vdr -w 0 --lirc -s /usr/bin/vdrshutdown
+ 
+#eval vdr -g /tmp -L /usr/lib/vdr/plugins --buffer=/media/video --log=3 -p 6419 --vfat --no-kbd $PLUGINS -v /media/video -c /etc/vdr -w 0 --lirc -s /usr/bin/vdrshutdown
+

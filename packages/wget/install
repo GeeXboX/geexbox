@@ -1,8 +1,0 @@
-#!/bin/sh
-
-. config/options
-
-cd $BUILD/$1*
-
-do_install usr/bin/wget
-do_install etc/wgetrc

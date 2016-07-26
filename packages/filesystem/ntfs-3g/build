@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+do_configure \
+            --disable-dependency-tracking \
+            --with-fuse=external \
+            --disable-library \
+            --enable-posix-acls \
+            --disable-mtab \
+
+make
+make_install

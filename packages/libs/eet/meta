@@ -1,0 +1,10 @@
+PKG_NAME=eet
+PKG_VERSION=`( get_meta EFL; echo $PKG_VERSION )`
+PKG_URL="http://download.enlightenment.org/releases/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
+PKG_REV=2
+PKG_BUILD_DEPENDS="toolchain libjpeg-turbo gnutls eina libgcrypt"
+PKG_RUN_DEPENDS="$TARGET_LIBC libjpeg-turbo eina"
+PKG_PRIORITY=optional
+PKG_SECTION=libs
+PKG_SHORTDESC="Enlightenment DR17 file chunk reading/writing library"
+PKG_LONGDESC="Eet is a tiny library designed to write an arbitary set of chunks of data to a file and optionally compress each chunk (very much like a zip file) and allows fast random-access reading of the file later on. It does not do zip as zip itself has more complexity than needed, and it was much simpler to implement this once here. It's small, fast, and does a job. It's heavily commented and fully documented."

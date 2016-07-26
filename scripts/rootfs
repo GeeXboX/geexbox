@@ -17,6 +17,7 @@ mkdir -p $INSTALL
 # bootstrap the build environment
 $SCRIPTS/build opkg-utils
 $SCRIPTS/build opkg-host
+$SCRIPTS/install base-files 
 $SCRIPTS/installdev opkg-utils
 $SCRIPTS/installdev opkg-host
 
@@ -31,7 +32,8 @@ for f in $INSTALL/var/lib/opkg/info/*.control ; do
 #    echo "$package : drop : $drop_package"
     break
   done
-  if [ "$drop_package" = yes ] || [ $PACKAGES/$package/unpack -nt $f -o $PACKAGES/$package/patches -nt $f ] || [ $PACKAGES/$package/build -nt $f ] || [ $PACKAGES/$package/install -nt $f ] || [ $PACKAGES/$package/meta -nt $f ]; then
+  if [ "$drop_package" = yes ] || [ $PACKAGES/*/$package/meta -nt $f ] || [ $PACKAGES/*/$package/patches -nt $f ] || \
+     [ $PACKAGES/*/$package/unpack -nt $f ] || [ $PACKAGES/*/$package/build -nt $f ] || [ $PACKAGES/*/$package/install -nt $f ]; then
 #    echo "$package : drop : $drop_package"
     $SCRIPTS/uninstall $package
   fi
@@ -54,15 +56,18 @@ for package in $OPK_PACKAGES; do
   $SCRIPTS/package $package
 done
 
+# set package status to "installed"
+sed -e "s/ unpacked$/ installed/" -i $INSTALL/var/lib/opkg/status
+
 # create kernel modules dependancies
 if [ "$DEPMOD" = yes ]; then
   $SCRIPTS/installdev kmod-host
   VER=$(kernel_version)
-  rm -f $INSTALL/lib/modules/$VER/modules.*
-  $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL -v $VER > /dev/null
-  for i in `ls $INSTALL/lib/modules/$VER/modules.* | grep -v modules.dep | grep -v modules.alias | grep -v modules.symbols`; do
+  for i in `ls $INSTALL/lib/modules/$VER/modules.* | \
+      grep -v modules.order | grep -v modules.builtin`; do
     rm -f $i
   done
+  $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL -C $INSTALL/etc/depmod.d -v $VER > /dev/null
 fi
 
 # save build config

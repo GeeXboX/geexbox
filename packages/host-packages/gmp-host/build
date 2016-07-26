@@ -1,0 +1,28 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+$SCRIPTS/unpack $PKG_PARENT
+
+cd $BUILD/${PKG_PARENT}-${PKG_VERSION}
+
+export CFLAGS="$CFLAGS -fPIC"
+export CPPFLAGS="$CPPFLAGS -fexceptions"
+
+mkdir -p objdir-host
+cd objdir-host
+
+do_configure host \
+	--target=$TARGET_NAME \
+	--enable-mpbsd \
+	--enable-cxx \
+
+make
+#make check
+make_install toolchain
+
+mkdir -p $ROOT/$PKG_BUILD_DIR
+rm -rf $ROOT/$PKG_BUILD_DIR/.install
+mv .install $ROOT/$PKG_BUILD_DIR

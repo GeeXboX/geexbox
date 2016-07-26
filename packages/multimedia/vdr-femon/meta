@@ -1,0 +1,12 @@
+PKG_NAME=vdr-femon
+#PKG_VERSION=2.0.4
+PKG_VERSION=2.1.1
+PKG_URL="http://www.saunalahti.fi/~rahrenbe/vdr/femon/files/vdr-femon-${PKG_VERSION}.tgz"
+PKG_REV=1
+PKG_DEPENDS="$TARGET_LIB vdr"
+PKG_BUILD_DEPENDS="toolchain vdr"
+PKG_RUN_DEPENDS="$TARGET_LIBC vdr"
+PKG_PRIORITY=optional
+PKG_SECTION=multimedia
+PKG_SHORTDESC="VDR -- DVB Frontend Status Monitor plugin"
+PKG_LONGDESC="vdr-femon is a plugin for VDR, the Video Disk Recorder. This plugin displays some signal information parameters of the current tuned channel on OSD. You can zap through all your channels and the plugin should be monitoring always the right frontend. The transponder and stream information are also available in advanced display modes"

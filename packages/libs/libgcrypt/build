@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+export MAKEFLAGS=-j1
+
+export TARGET_CFLAGS="`echo $TARGET_CFLAGS | sed -e "s/-O3/-O2/"`"
+
+do_configure \
+            --disable-asm \
+
+make
+make_install
+
+for i in lib include; do
+  sed -i "s%^${i}dir=.*%${i}dir=$LIB_PREFIX/${i}%" \
+    .install/usr/bin/libgcrypt-config
+done
+

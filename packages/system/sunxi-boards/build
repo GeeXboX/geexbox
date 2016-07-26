@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. config/options
+
+. $CONFIG_MACHINE/meta
+
+if [ -z "$MACHINE_BOARD_CONFIG" ]; then
+  echo "$TARGET_PLATFORM does not define any board configuration, aborting."
+  echo "Please add MACHINE_BOARD_CONFIG to your platform meta file"
+  exit 1
+fi
+
+cd $BUILD/$1*
+
+cfgfile=sys_config/$TARGET_PLATFORM/$MACHINE_BOARD_CONFIG
+outfile=script.bin
+
+mkdir -p .install/share/u-boot
+fex2bin $cfgfile .install/share/u-boot/$outfile
+
+exit 0

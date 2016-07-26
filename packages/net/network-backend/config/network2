@@ -1,0 +1,38 @@
+# Network configuration
+
+# Enable secondary interface
+ENABLE="false"
+
+# Backend software to use for network management (e.g. "connman, networkmanager,  udhcpc, none")
+NETWORK_BACKEND="none"
+
+# "LAN" or "WLAN" or "" (default is "" <--> "LAN")
+NETWORK="LAN"
+
+# Network interface name or address (e.g. "eth0" or "00:0d:56:ec:ba:0c")
+IFACE=""
+
+# Static IP address ("" for DHCP) in CIDR format (e.g. "192.168.1.1/24")
+ADDRESS=""
+
+# Network gateway (e.g. "192.168.1.254")
+GATEWAY=""
+
+# List of DNS servers (e.g. "192.168.1.253 192.168.1.254")
+# This will override the DNS servers from DHCP
+DNS_SERVER=""
+
+# WLAN network name
+SSID=""
+
+# Enable access to hidden WLANs "true" or ""
+HIDDEN=""
+
+# "WEP" or "PSK" or "" or "RSN", set to "RSN" when your network uses WPA2 security
+SECURITY=""
+
+# WLAN password
+PASSPHRASE=""
+
+# Wait for network driver initialisation
+WAIT_FOR_SLOW_DEVICE="false"

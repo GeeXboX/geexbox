@@ -1,0 +1,9 @@
+PKG_NAME=openssl-host
+PKG_VERSION=`( get_meta openssl; echo $PKG_VERSION )`
+PKG_URL=`( get_meta openssl; echo $PKG_URL )`
+PKG_REV=1
+PKG_BUILD_DEPENDS="toolchain makedepend"
+PKG_PRIORITY=optional
+PKG_SECTION="host-packages"
+PKG_SHORTDESC="Secure Socket Layer (SSL) library"
+PKG_LONGDESC="This is the OpenSSL implementation of Secure Socket Layer (SSL)."

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_install usr/lib/liblirc_client.so*
+do_install usr/sbin/lircd
+
+if pkg_uses $1 devtools; then
+  do_install usr/bin
+else
+  do_install usr/bin/irpty
+fi
+
+mkdir -p $INSTALL/etc/lirc
+cp -R remotes $INSTALL/etc/lirc
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/* $INSTALL/etc/lirc
+
+ln -sf remotes/mceusb/lircd.conf.mceusb $INSTALL/etc/lirc/lircd.conf

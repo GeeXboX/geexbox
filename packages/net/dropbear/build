@@ -1,0 +1,37 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+sed -i 's%\/\*#define DEBUG_TRACE\*\/%#define DEBUG_TRACE%' debug.h
+
+do_configure \
+             --enable-zlib \
+             --disable-pam \
+             --enable-openpty \
+             --enable-syslog \
+             --enable-shadow \
+             --disable-lastlog \
+             --disable-utmp \
+             --disable-utmpx \
+             --disable-wtmp \
+             --disable-wtmpx \
+             --enable-loginfunc \
+             --disable-pututline \
+             --disable-pututxline \
+
+
+PROGRAMS="dropbear dropbearkey"
+pkg_uses $1 scp && PROGRAMS="$PROGRAMS scp"
+pkg_uses $1 dbclient && PROGRAMS="$PROGRAMS dbclient"
+export MULTI=1
+export PROGRAMS
+
+make
+make_install
+
+ln -s dropbearmulti .install/usr/bin/dropbear
+
+exit 0

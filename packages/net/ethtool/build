@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. config/options
+
+cd $BUILD/$1*
+
+if [ "$TARGET_ARCH" = i386 -o "$TARGET_ARCH" = x86_64  ] ; then
+  EXTRA_CONFIG=--enable-pretty-dump
+else
+  EXTRA_CONFIG=--disable-pretty-dump
+fi
+
+do_configure $EXTRA_CONFIG
+
+make
+make_install

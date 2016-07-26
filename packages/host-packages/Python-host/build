@@ -1,0 +1,38 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+# Python needs itself and a "pgen" program to build itself, both being
+# provided in the Python sources. So in order to cross-compile Python,
+# we need to build a host Python first. This host Python is also
+# installed in the toolchain, as it is needed when cross-compiling
+# third-party Python modules.
+
+export BUILD_SYS=""
+export HOST_SYS=""
+export LIBC=""
+export STAGING_LIBDIR=$ROOT/$TOOLCHAIN/lib
+export STAGING_INCDIR=$ROOT/$TOOLCHAIN/include
+
+# let setup.py search for extension libs in toolchain as well
+local_cppflags="-I$STAGING_INCDIR"
+
+do_autoconf
+do_configure host \
+  --without-cxx-main \
+  --with-system-expat \
+
+make
+make_install toolchain
+
+# install pgen tool
+cp -P Parser/pgen .install/usr/bin/pgen
+
+sed -i "s:#!/usr/bin/python2.7:#!$ROOT/$TOOLCHAIN/bin/python2.7:" \
+  .install/usr/bin/python2.7-config
+  
+sed -i -e 's,^\(ENABLE_USER_SITE = \).*,\1False,' \
+  .install/usr/lib/python2.7/site.py

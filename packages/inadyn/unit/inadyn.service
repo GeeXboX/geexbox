@@ -1,8 +1,0 @@
-[Unit]
-Description=Inadyn a Simple Dynamic DNS client
-
-[Service]
-ExecStart=/usr/bin/inadyn
-
-[Install]
-WantedBy=multi-user.target

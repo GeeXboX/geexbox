@@ -1,0 +1,24 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+# Remove MesaGL when GLES is present
+[ ! "$GLES_PROVIDER" = mesa ] && $SCRIPTS/uninstalldev mesa
+
+# Special handling for old VIVANTE libs
+[ "$GLES_PROVIDER" = vivante ] && export local_ldflags="-lEGL"
+
+cd $PKG_BUILD_DIR
+
+do_autoconf
+
+do_configure target \
+	--prefix=/usr \
+	--enable-addons-with-dependencies
+
+make
+make_install
+
+find .install/usr/share -name *.xml.in -delete
+do_strip shlib "`find .install/usr/lib -name *.pvr`"

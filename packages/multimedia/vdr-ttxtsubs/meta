@@ -1,0 +1,12 @@
+PKG_NAME=vdr-ttxtsubs
+PKG_URL_REV="8a00132"
+PKG_VERSION="0.3.0"
+PKG_URL_PROTO=git
+PKG_URL="git://projects.vdr-developer.org/vdr-plugin-ttxtsubs.git"
+PKG_REV=1
+PKG_BUILD_DEPENDS="toolchain"
+PKG_RUN_DEPENDS="$TARGET_LIBC vdr"
+PKG_PRIORITY=optional
+PKG_SECTION=multimedia
+PKG_SHORTDESC="VDR -- ttxtsubs plugin"
+PKG_LONGDESC="vdr-ttxtsubs is a plugin for VDR, the Video Disk Recorder. It adds support for Teletext subtitles."

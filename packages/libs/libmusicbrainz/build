@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+setup_toolchain host
+mkdir -p build-native
+cd build-native
+cmake ..
+make
+cd ..
+
+setup_toolchain target
+do_cmake_build \
+  -DIMPORT_EXECUTABLES=../build-native/ImportExecutables.cmake

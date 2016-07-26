@@ -1,0 +1,26 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+OPT_IPV6="--disable-ipv6"
+if pkg_uses linux ipv6 ; then 
+  OPT_IPV6="--enable-ipv6"
+fi
+
+do_configure \
+            --disable-opie \
+            --disable-digest \
+            --disable-ntlm \
+            --disable-debug \
+            $OPT_IPV6 \
+            --disable-nls \
+            --disable-rpath \
+            --with-libgnutls-prefix=$LIB_PREFIX \
+
+
+echo "MAKEINFO=" >> doc/Makefile
+make
+make_install

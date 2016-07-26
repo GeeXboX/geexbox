@@ -10,10 +10,10 @@ do_md5sum () {
  MD5=$(md5sum "$1" | cut -d ' ' -f 1)
  if [ "$MD5" != "$PKG_MD5" ]; then
   echo "INVALID"
+  mv -f "$1" "$1.BAD"
   exit 1
- else
-  echo "OK"
  fi
+ echo "OK"
 }
 
 do_sha256sum () {
@@ -22,10 +22,10 @@ do_sha256sum () {
  SHA256=$(sha256sum "$1" | cut -d ' ' -f 1)
  if [ "$SHA256" != "$PKG_SHA256" ]; then
   echo "INVALID"
+  mv -f "$1" "$1.BAD"
   exit 1
- else
-  echo "OK"
  fi
+ echo "OK"
 }
 
 if [ -z "$1" ]; then
@@ -42,9 +42,9 @@ if [ -z "$1" ]; then
 fi
 
 mkdir -p $STAMPS_NOARCH/$1
-STAMP=$STAMPS_NOARCH/$1/get
+STAMP=$STAMPS_NOARCH/$1/${BUILD#$BUILD_BASE}.get
 
-if [ -f $PACKAGE_URL ]; then
+if [ -f "$PACKAGE_URL" ]; then
   if [ -f $STAMP ]; then
     [ ! $STAMP -ot $PACKAGE_URL ] && exit 0
   fi
@@ -74,12 +74,12 @@ if [ "$DL" = yes ]; then
 
   set_title "GET      $1"
 
-  WGET_OPT="--no-check-certificate --passive-ftp --dns-timeout=5 --connect-timeout=5 --read-timeout=5 --tries=1 -c"
+  WGET_OPT="--no-check-certificate --passive-ftp --dns-timeout=50 --connect-timeout=50 --read-timeout=50 --tries=1 -c"
   [ "$VERBOSE" != yes ] && WGET_OPT="$WGET_OPT -q"
 
   mkdir -p $SOURCES/$1
 
-  [ -f $PACKAGE_URL ] && \
+  [ -f "$PACKAGE_URL" ] && \
     URLS=`cat $PACKAGE_URL`
 
   [ -n "$PKG_URL" ] && \
@@ -121,10 +121,26 @@ if [ "$DL" = yes ]; then
             ;;
           git)
             GITREV=HEAD
-            [ -n "$PKG_URL_REV" ] && GITREV="$PKG_URL_REV"
-            git clone --recursive $PKG_URL $SOURCES/$1/$REPO_BASENAME
+            [ -n "$PKG_URL_REV" ] && GITREV=`echo "$PKG_URL_REV" | sed -e "s/.*~//"`
+
+            if  [ `expr substr $PKG_URL 1 7` = "file://" ] ; then
+              WORK_PATH=`echo $PKG_URL | sed -e "s%.\{7\}%%" -e "s%~%$HOME%"`
+              ln -sf $WORK_PATH $SOURCES/$1/$REPO_BASENAME
+              cd $WORK_PATH; WORK_BRANCH=`git branch | grep '*' | cut -b3-`; cd -
+            else
+              CLONE_OPT=""
+              [ -n "$PKG_URL_BRANCH" ] && CLONE_OPT="--depth=1 -b $PKG_URL_BRANCH"
+
+              git clone $CLONE_OPT $PKG_URL $SOURCES/$1/$REPO_BASENAME
+              WORK_BRANCH="(no branch)"
+            fi
+
             git --git-dir=$SOURCES/$1/$REPO_BASENAME/.git --work-tree=$SOURCES/$1/$REPO_BASENAME checkout $GITREV
-            (cd $SOURCES/$1/$REPO_BASENAME; $ROOT/$SCRIPTS/git-archive-all --prefix $REPO_BASENAME/ --rev $GITREV | bzip2 > ../$REPO_ARCHIVE )
+            [ "$PKG_RECURSIVE" = yes ] && (cd $SOURCES/$1/$REPO_BASENAME; git submodule update --init --recursive)
+
+            (REPO_ARCHIVE_FILE=$PWD/$SOURCES/$1/$REPO_ARCHIVE; cd $SOURCES/$1/$REPO_BASENAME; \
+             $ROOT/$SCRIPTS/git-archive-all --prefix $REPO_BASENAME/ --rev $GITREV | bzip2 > $REPO_ARCHIVE_FILE; \
+             [ ! "$WORK_BRANCH" = "(no branch)" ] && git checkout $WORK_BRANCH || true)
             ;;
           hg)
             [ -n "$PKG_URL_REV" ] && HGREV="-u $PKG_URL_REV"
@@ -156,26 +172,31 @@ if [ "$DL" = yes ]; then
 
       i=$(eval echo $i)
 
-      NBWGET=1
+      if [ -n "$PKG_ARCHIVE_NAME" ]; then
+        PACKAGE_BASENAME=$PKG_ARCHIVE_NAME
+      else
+        PACKAGE_BASENAME=`/bin/echo -e $(basename $i | sed -e 's/%\([0-9A-F][0-9A-F]\)/\\\\\x\1/g')`
+      fi
 
-      PACKAGE_BASENAME=`/bin/echo -e $(basename $i | sed -e 's/%\([0-9A-F][0-9A-F]\)/\\\\\x\1/g')`
-
-      if [ -f $MACHINE_PACKAGES/$1/$i ]; then
+      if [ -f $SOURCES/$1/$PACKAGE_BASENAME ]; then
+        # file is already downloaded, just ignore.
+        echo "Detected $PACKAGE_BASENAME for $1 sources..."
+      elif [ -f $MACHINE_PACKAGES/$1/$PACKAGE_BASENAME ]; then
         # machine-specific file is already here, just copy
-        echo "\nJust copying machine $i for $1 sources..."
-        cp $MACHINE_PACKAGES/$1/$i $SOURCES/$1
-      elif [ -f $PLATFORM_PACKAGES/$1/$i ]; then
+        echo "\nJust copying machine $PACKAGE_BASENAME for $1 sources..."
+        cp $MACHINE_PACKAGES/$1/$PACKAGE_BASENAME $SOURCES/$1
+      elif [ -f $PLATFORM_PACKAGES/$1/$PACKAGE_BASENAME ]; then
         # platform-specific file is already here, just copy
-        echo "\nJust copying platform $i for $1 sources..."
-        cp $PLATFORM_PACKAGES/$1/$i $SOURCES/$1
-      elif [ -f $FLAVOUR_PACKAGES/$1/$i ]; then
+        echo "\nJust copying platform $PACKAGE_BASENAME for $1 sources..."
+        cp $PLATFORM_PACKAGES/$1/$PACKAGE_BASENAME $SOURCES/$1
+      elif [ -f $FLAVOUR_PACKAGES/$1/$PACKAGE_BASENAME ]; then
         # flavour-specific file is already here, just copy
-        echo "\nJust copying flavour $i for $1 sources..."
-        cp $FLAVOUR_PACKAGES/$1/$i $SOURCES/$1
-      elif [ -f $PACKAGES/$1/$i ]; then
+        echo "\nJust copying flavour $PACKAGE_BASENAME for $1 sources..."
+        cp $FLAVOUR_PACKAGES/$1/$PACKAGE_BASENAME $SOURCES/$1
+      elif [ -f $PACKAGES/$PKG_SECTION/$1/$PACKAGE_BASENAME ]; then
         # file is already here, just copy
-        echo "\nJust copying $i for $1 sources..."
-        cp $PACKAGES/$1/$i $SOURCES/$1
+        echo "\nJust copying $PACKAGE_BASENAME for $1 sources..."
+        cp $PACKAGES/$PKG_SECTION/$1/$PACKAGE_BASENAME $SOURCES/$1
       else
         # have to download
 
@@ -183,28 +204,27 @@ if [ "$DL" = yes ]; then
         [ "$MIRROR" = yes -a -n "$MIRROR_URL" ] \
           && i="$MIRROR_URL/$PACKAGE_BASENAME"
 
-        until [ -f $STAMPS_NOARCH/$1/$PACKAGE_BASENAME.ok ] || wget $WGET_OPT -P $SOURCES/$1 $i; do
-          NBWGET=$(($NBWGET+1))
-          if [ $NBWGET -gt 10 ]; then
+        NBWGET=10
+        WGET_ARGS="-O $SOURCES/$1/$PACKAGE_BASENAME $i"
+        until wget $WGET_OPT $WGET_ARGS; do
+          NBWGET=$(($NBWGET-1))
+
+          if [ $NBWGET -eq 2 ]; then
             if [ "$MIRROR" = yes -a -n "$MIRROR_URL" ]; then
-              echo "\nCan't get $1 sources : $i\n Try later !!"
-              exit 1
+              NBWGET=0
             else
               echo "\nCan't get $1 sources, trying on OpenBricks server..."
-              until [ -f $STAMPS_NOARCH/$1/$PACKAGE_BASENAME.ok ] || wget $WGET_OPT -P $SOURCES/$1 $DISTRO_SRCS/$PACKAGE_BASENAME; do
-                NBWGET=$(($NBWGET+1))
-                if [ $NBWGET -gt 10 ]; then
-                  echo "\nCan't get $1 sources : $i\n Try later !!"
-                  exit 1
-                fi
-              done
+              WGET_ARGS="-P $SOURCES/$1 $DISTRO_SRCS/$PACKAGE_BASENAME"
             fi
-
-            do_md5sum    "$SOURCES/$1/$PACKAGE_BASENAME"
-            do_sha256sum "$SOURCES/$1/$PACKAGE_BASENAME"
-            touch $STAMPS_NOARCH/$1/$PACKAGE_BASENAME.ok
+          fi
+          
+          if [ $NBWGET -eq 0 ]; then
+            rm -f $SOURCES/$1/$PACKAGE_BASENAME
+            echo "\nCan't get $1 sources : $i\n Try later !!"
+            exit 1
           fi
         done
+
       fi
 
       do_md5sum    "$SOURCES/$1/$PACKAGE_BASENAME"
@@ -213,12 +233,12 @@ if [ "$DL" = yes ]; then
     done
   fi
 
-  [ -f $PACKAGE_URL ] && \
+  [ -f "$PACKAGE_URL" ] && \
     cp -p $PACKAGE_URL $STAMP
 
   [ -n "$PKG_URL" ] && \
     echo $PKG_STAMP > $STAMP
 
-  rm -f $BUILD_BASE*/$STAMPS_NOARCH/$1/unpack
-  rm -f $BUILD_BASE*/$STAMPS_NOARCH/$1/build
+  rm -f $STAMPS/$1/unpack
+  rm -f $STAMPS/$1/build
 fi

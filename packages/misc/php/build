@@ -1,0 +1,41 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+export ac_cv_php_xml2_config_path=$LIB_PREFIX/bin/xml2-config
+export PHP_NATIVE_DIR=$ROOT/$TOOLCHAIN/bin
+export MAKEFLAGS=-j1
+
+export EXTENSION_DIR=/usr/lib/php/modules
+
+do_configure --without-iconv \
+             --with-sqlite3 \
+             --with-pdo-sqlite \
+             --with-openssl \
+             --with-gd \
+             --with-jpeg-dir=$LIB_PREFIX \
+             --with-xpm-dir=$LIB_PREFIX \
+             --with-freetype-dir=$LIB_PREFIX \
+             --with-png-dir=$LIB_PREFIX \
+             --with-zlib-dir=$LIB_PREFIX \
+             --enable-zip \
+             --with-curl=$LIB_PREFIX \
+             --with-config-file-path=/etc/ \
+             --enable-mysqlnd \
+             --with-mysqli=mysqlnd \
+             --with-mysql=$LIB_PREFIX \
+             --with-pdo-mysql \
+             --with-mysql-sock=/var/run/mysqld/mysqld.sock \
+             --enable-mbstring
+
+sed -i -e 's/-ffast-math//g' Makefile
+touch ext/mysqlnd/php_mysqlnd_config.h
+
+make
+make_install
+
+mkdir -p .install/$EXTENSION_DIR .install/etc
+cp php.ini-production .install/etc/php.ini

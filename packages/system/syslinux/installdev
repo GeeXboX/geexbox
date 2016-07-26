@@ -1,0 +1,42 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+do_installdev usr/share/syslinux/ldlinux.sys toolchain
+do_installdev usr/share/syslinux/ldlinux.bss toolchain
+do_installdev usr/share/syslinux/mbr.bin toolchain
+do_installdev usr/share/syslinux/gptmbr.bin toolchain
+do_installdev usr/share/syslinux/isohdpfx*.bin toolchain
+do_installdev usr/share/syslinux/isohdppx*.bin toolchain
+do_installdev boot toolchain
+
+# ISOLINUX
+ISOLINUX_DIR="$INSTALL/boot"
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/isolinux.cfg $ISOLINUX_DIR
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/help.msg $ISOLINUX_DIR
+if [ -r $CONFIG_FLAVOUR/splash.png ]; then
+  cp $CONFIG_FLAVOUR/splash.png $ISOLINUX_DIR
+else
+  cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/splash.png $ISOLINUX_DIR
+fi
+
+if [ "$INSTALLATOR" = "yes" ]; then
+  [ "$TARGET_ARCH" = i386 -o "$TARGET_ARCH" = x86_64 ] && INS_PARAMS="^#INS#" || INS_PARAMS="^#INS#.*"
+  sed -i s%$INS_PARAMS%% $ISOLINUX_DIR/isolinux.cfg
+fi
+if [ "$CONFIGURATOR" = "yes" ]; then
+  CFG_PARAMS="^#CFG#"
+  sed -i s%$CFG_PARAMS%% $ISOLINUX_DIR/isolinux.cfg
+fi
+
+sed -i s%extra_cmdline_params%$EXTRA_CMDLINE_PARAMS% $ISOLINUX_DIR/isolinux.cfg
+sed -i s%distro-name%$DISTRONAME% $ISOLINUX_DIR/isolinux.cfg
+sed -i s%target-arch%$TARGET_ARCH% $ISOLINUX_DIR/isolinux.cfg
+sed -i s%release-nr%$DISTRO_VERSION% $ISOLINUX_DIR/isolinux.cfg
+
+# PXELINUX
+mkdir -p $INSTALL/boot/pxelinux.cfg
+cp $ISOLINUX_DIR/isolinux.cfg $INSTALL/boot/pxelinux.cfg/default

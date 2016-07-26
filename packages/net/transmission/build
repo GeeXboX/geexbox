@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+./autogen.sh
+do_configure --with-systemd-daemon
+make
+make_install
+
+mkdir -p .install/srv/www/htdocs/transmission
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/www/* .install/srv/www/htdocs

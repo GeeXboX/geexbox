@@ -1,0 +1,67 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+# restart from scratch in case there are leftovers from a previous build
+rm -f config.cache
+rm -f Makefile.orig
+[ -f Makefile ] && make distclean
+[ -d .install ] && rm -rf .install
+
+export ac_cv_have_long_long_format=yes
+export ac_cv_file__dev_ptmx=yes
+export ac_cv_file__dev_ptc=yes
+export ac_cv_working_tzset=yes
+
+export CROSS_COMPILE=$TARGET_PREFIX
+export PYTHONBUILDDIR=$ROOT/$PKG_BUILD_DIR
+
+OPT_IPV6="--disable-ipv6"
+if pkg_uses linux ipv6 ; then 
+  OPT_IPV6="--enable-ipv6"
+fi
+
+# build target python
+do_configure \
+  $OPT_IPV6 \
+  --with-system-ffi \
+  --with-system-expat \
+  --without-cxx-main \
+  --without-doc-strings \
+
+autoreconf -Wcross --verbose --install --force Modules/_ctypes/libffi
+
+# regenerate platform specific files, because they depend on system headers
+cd Lib/plat-linux2
+  include=$SYSROOT_PREFIX/usr/include $ROOT/$TOOLCHAIN/bin/python \
+  $ROOT/$PKG_BUILD_DIR/Tools/scripts/h2py.py -i '(u_long)' \
+  $SYSROOT_PREFIX/usr/include/dlfcn.h \
+  $SYSROOT_PREFIX/usr/include/linux/cdrom.h \
+  $SYSROOT_PREFIX/usr/include/netinet/in.h \
+  $SYSROOT_PREFIX/usr/include/sys/types.h
+  sed -e "s,$SYSROOT_PREFIX,,g" -i *.py
+cd -
+
+sed -i -e s,ccache\ ,'$(CCACHE) ', Makefile
+
+sed -i -e "s/@LIB@/lib/g" Makefile
+
+make CROSS_COMPILE="${TARGET_PREFIX}" \
+     PYTHONBUILDDIR="$ROOT/$PKG_BUILD_DIR" \
+     HOSTPGEN=$ROOT/$TOOLCHAIN/bin/pgen \
+     HOSTPYTHON=$ROOT/$TOOLCHAIN/bin/python \
+     STAGING_LIBDIR=$LIB_PREFIX/lib \
+     STAGING_INCDIR=$LIB_PREFIX/include \
+     STAGING_BASELIBDIR=$SYSROOT_PREFIX/usr/lib \
+     STAGING_BASEINCDIR=$SYSROOT_PREFIX/usr/include \
+     BUILD_SYS="$HOST_NAME" \
+     HOST_SYS="$TARGET_NAME" \
+     OPT="$CFLAGS" \
+     DESTDIR=$ROOT/$PKG_BUILD_DIR/.install \
+     LIBDIR=/usr/lib install
+
+chmod +w .install/usr/lib/*.so*
+strip_libs .install/usr/lib

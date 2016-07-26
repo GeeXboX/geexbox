@@ -2,7 +2,10 @@
 
 DEVICE="$1"
 ROOTFS="$2"
+IMGSIZE=1536
+LOOPDEV="/dev/loop1"
 DEFAULT_TARGET="(undefined)"
+
 
 # define target machine
 TARGET=$DEFAULT_TARGET
@@ -14,52 +17,93 @@ boot_part_size="64M"
 case $TARGET in
 #don't remove the following comment
 #begin_targets
-  cubieboard)  fs_types="fat32 ext4" ;;
-  cubox)       fs_types="ext4"       ;;
-  cuboxi)      fs_types="ext3"       ;;
-  raspberrypi) fs_types="fat32 ext4" ;;
-  igepv2)      fs_types="fat32 ext2" ;  boot_part_size="16M" ;; 
-  pandaboard)  fs_types="fat32 ext4" ;;
-  snowball-v5) fs_types="fat32 ext4" ;;
-  efikamx)     fs_types="undefined"  ;;
-  ac100)       fs_types="undefined"  ;;
-  harmony)     fs_types="undefined"  ;;
-  sabrelite)   fs_types="undefined"  ;;
+  cubieboard)    fs_types="fat32 ext4" ;;
+  cubieboard2)   fs_types="fat32 ext4" ;;
+  cubietruck)    fs_types="fat32 ext4" ;;
+  cubox)         fs_types="ext4"       ;;
+  cuboxi)        fs_types="fat32 ext4" ;;
+  utilite)       fs_types="fat32 ext4" ;;
+  raspberrypi)   fs_types="fat32 ext4" ;;
+  raspberrypi2)  fs_types="fat32 ext4" ;;
+  igepv2)        fs_types="fat32 ext2" ;  boot_part_size="16M" ;; 
+  pandaboard)    fs_types="fat32 ext4" ;;
+  snowball-v5)   fs_types="fat32 ext4" ;;
+  efikamx)       fs_types="undefined"  ;;
+  ac100)         fs_types="undefined"  ;;
+  harmony)       fs_types="undefined"  ;;
+  sabrelite)     fs_types="undefined"  ;;
+  tbs2910)       fs_types="fat32 ext4" ;;
 #end_targets
 #don't remove the preceeding comment
 esac
 
 
-if [ ! -b "$DEVICE" ] || [ ! -f "$ROOTFS" -a ! -d "$ROOTFS" ] || [ -z "$fs_types" ] ; then
-  echo "Usage: $0 <device> <rootfs|rootfs-archive> [target-machine]\n"
+# workaound for different 'echo' implmentations
+put_str() {
+  printf "$*\n"
+}
 
-  echo "Default target-machine type is:"
-  echo "  $DEFAULT_TARGET\n"
+# check for rootfs url
+ROOTFS_LINK="rootfs.url"
+if [ -n "$ROOTFS" ] && echo "$ROOTFS" | grep -q "^https\?://.*\.tar\.xz$"; then
+  if curl -Is $ROOTFS | grep -q "^HTTP.*200 OK"; then
+    echo "$ROOTFS" > $ROOTFS_LINK
+    ROOTFS=$ROOTFS_LINK
+  else
+    rm -f $ROOTFS_LINK
+  fi
+fi
 
-  echo "Supported target-machine types are:"
-  curr=`cat $0`
+if [ ! -f "$ROOTFS" ] && [ ! -d "$ROOTFS" ] || [ -z "$fs_types" ] ; then
+  put_str "Usage: $0 <device|img-file> <rootfs|rootfs-archive|rootfs-url> [target-machine]\n"
+
+  put_str "Supported target-machine types are:"
+  curr=$(cat $0)
   curr=${curr#*#begin_targets}
   curr=${curr%%#end_targets*}
   while [ "$prev" != "$curr" ] ; do
-    echo " "${curr%%)*}
+    put_str " "${curr%%)*}
     prev=$curr
     curr=${curr#*;;}
   done
+
+  put_str "Default target-machine type is:"
+  put_str "  $DEFAULT_TARGET\n"
   
   exit 1
 fi
 
-if [ "`id -u`" -ne 0 ] ; then
-  echo "Notice: Please run this program as root."
+if [ "$(id -u)" -ne 0 ] ; then
+  put_str "Notice: Please run this program as root."
   exit 1
 fi
 
-echo "I'm about to overwrite \033[1m${DEVICE}\033[0m . All existing data will be lost !"
-until [ "$REPLY" = y -o "$REPLY" = yes ] || [ "$REPLY" = n -o "$REPLY" = no ] ; do
-  read -p "Do you want to continue (y/n) ? " REPLY
-done
-[ "$REPLY" = n -o "$REPLY" = no ] && exit
+if [ ! -b "$DEVICE" ] ; then
+  if echo $DEVICE | grep -q "/dev/" ; then 
+    put_str "Unknown block device : $DEVICE"
+    exit 1
+  else
+    IMG="$DEVICE"
+    DEVICE=$LOOPDEV
+    put_str "Using : $DEVICE for img file $IMG"
+  fi
+fi
 
+if [ -z "$IMG" ] ; then 
+  put_str "I'm about to overwrite \033[1m${DEVICE}\033[0m . All existing data will be lost !"
+  until [ "$REPLY" = y -o "$REPLY" = yes ] || [ "$REPLY" = n -o "$REPLY" = no ] ; do
+    read -p "Do you want to continue (y/n) ? " REPLY
+  done
+  [ "$REPLY" = n -o "$REPLY" = no ] && exit
+else
+  put_str "I'm about to create \033[1m${IMG}\033[0m . All existing data will be lost !"
+fi
+
+# message output / debugging helper
+put_msg() {
+   #read -p "$* [Enter]"
+   put_str "\n$*"
+}
 
 # prepare "mkfs" command
 create_mkfs_command () {
@@ -76,14 +120,22 @@ create_mkfs_command () {
   echo "$mkfs_cmd"
 }
 
+# Create initial file for img file if needed
+if [ -n "$IMG" ] ; then
+  put_msg "#### Creating image file"
+  dd if=/dev/zero of=$IMG bs=1M count=$IMGSIZE
+  losetup -d $DEVICE || true
+  losetup $DEVICE $IMG
+fi
+
 # count partitions and check their types
 part_count=0
 boot_part_type="83"
 for fs_type in $fs_types ; do
-  mkfs_cmd=`create_mkfs_command $fs_type "noname" "-"`
+  mkfs_cmd=$(create_mkfs_command $fs_type "noname" "-")
   
   if [ -z "$mkfs_cmd" ] ; then
-    echo "Fatal: unknown filesystem type: '$fs_type'"
+    put_str "Fatal: unknown filesystem type: '$fs_type'"
     exit 1
   fi
  
@@ -94,11 +146,12 @@ for fs_type in $fs_types ; do
     esac
   fi
   
-  part_count=`expr $part_count + 1`
+  part_count=$(expr $part_count + 1)
 done
 
 # define partitions and prepare "fdisk" command
 echo $DEVICE | grep -q mmc && OPT=p
+echo $DEVICE | grep -q loop && OPT=p
 partition_0=${DEVICE}${OPT}1 ; label_0="BOOT"
 partition_1=${DEVICE}${OPT}2 ; label_1="GEEXBOX"
 
@@ -111,54 +164,78 @@ else
 fi
 fdisk_cmd="echo -e \"$fdisk_input\" | fdisk $DEVICE"
 
-echo "\n#### Creating partion(s)..."
-grep -q $DEVICE /proc/mounts && grep $DEVICE /proc/mounts | cut -f2 -d\ | xargs umount
-dd if=/dev/zero of=$DEVICE bs=512 count=2048 > /dev/null
-sh -c "$fdisk_cmd" > /dev/null
+put_msg "#### Creating partion(s)..."
+if [ -z "$IMG" ] ; then
+  grep -q $DEVICE /proc/mounts && grep $DEVICE /proc/mounts | cut -f2 -d\ | xargs umount
+  dd if=/dev/zero of=$DEVICE bs=512 count=2048 > /dev/null
+  sh -c "$fdisk_cmd" > /dev/null
+else
+  sh -c "$fdisk_cmd" > /dev/null || true
+  partprobe $DEVICE
+fi
 fdisk -l $DEVICE
 
-echo "\n#### Creating file system(s)..."
+put_msg "#### Creating file system(s)..."
 part_count=0
 for fs_type in $fs_types ; do
   eval label=\$label_${part_count}
   eval partition=\$partition_${part_count}
-  mkfs_cmd=`create_mkfs_command $fs_type $label $partition`
+  mkfs_cmd=$(create_mkfs_command $fs_type $label $partition)
   
   sh -c "$mkfs_cmd" > /dev/null
   
-  part_count=`expr $part_count + 1`
+  part_count=$(expr $part_count + 1)
 done
 
-echo "\n#### Mounting..."
-mountdir=`mktemp -d`
+put_msg "#### Mounting..."
+mountdir=$(mktemp -d)
 mount $partition_1 $mountdir
 if [ "$partition_1" != "$partition_0" ] ; then
   mkdir -p $mountdir/boot
   mount $partition_0 $mountdir/boot
 fi
 
-echo "\n#### Copying files..."
+put_msg "#### Copying files..."
 if [ -d "$ROOTFS" ]; then
   cp -PR $ROOTFS/* $mountdir
+elif [ "$ROOTFS" = "$ROOTFS_LINK" ]; then
+  curl -L -k $(cat $ROOTFS) --progress | tar -xJ --no-same-owner -C $mountdir
+  rm -f $ROOTFS
 else
-  tar --no-same-owner -xjf $ROOTFS -C $mountdir
+  tar --no-same-owner -xaf $ROOTFS -C $mountdir
 fi
 
-if [ $TARGET = cubieboard ] ; then
-  echo "\n#### Writing boot record(s)..."
-  dd if=$mountdir/boot/sunxi-spl.bin of=$DEVICE bs=1024 seek=8
-  dd if=$mountdir/boot/u-boot.bin of=$DEVICE bs=1024 seek=32
+# trigger auto-resize feature 
+if [ -n "$IMG" ] ; then
+  touch $mountdir/etc/need-to-resize
+fi
+
+if [ $TARGET = cubieboard ] || [ $TARGET = cubieboard2 ] || [ $TARGET = cubietruck ] ; then
+  put_msg "#### Writing boot record(s)..."
+  dd if=$mountdir/boot/u-boot-sunxi-with-spl.bin of=$DEVICE bs=1024 seek=8 conv=fsync
 fi
 
 if [ $TARGET = cuboxi ] ; then
-  echo "\n#### Writing u-boot ..."
-  dd if=$mountdir/boot/u-boot.bin of=$DEVICE bs=512 seek=2 skip=2 conv=fsync
+  put_msg "#### Writing SPL ..."
+  dd if=$mountdir/boot/SPL of=$DEVICE bs=1024 seek=1
+  put_msg "#### Writing u-boot ..."
+  dd if=$mountdir/boot/u-boot.img of=$DEVICE bs=1024 seek=42
 fi
 
-echo "\n#### Flushing buffers..."
+if [ $TARGET = tbs2910 ] ; then
+  put_msg "#### Writing u-boot ..."
+  dd if=$mountdir/boot/u-boot.bin of=$DEVICE bs=1024 seek=1
+fi
+
+if [ $TARGET = utilite ] ; then
+  put_msg "#### Writing SPL and u-boot from cm-fx6-firmware file ..."
+  dd if=$mountdir/boot/cm-fx6-firmware of=/$DEVICE bs=1K skip=1 seek=1 oflag=dsync
+fi
+
+put_msg "#### Flushing buffers..."
 sync
 
-echo "\n#### Unmounting..."
+put_msg "#### Unmounting..."
 if [ "$partition_1" != "$partition_0" ] ; then
   umount $mountdir/boot
   rmdir $mountdir/boot
@@ -167,4 +244,12 @@ umount $mountdir
 rmdir $mountdir
 sync
 
-echo "\n#### Done.\n"
+if [ -n "$IMG" ] ; then
+  losetup -d $DEVICE || true
+  put_msg "#### Compressing img file to $IMG.xz ...."
+  xz -z -9 $IMG || true
+  chmod 666 $IMG.xz || true
+  rm -f $IMG
+fi
+
+put_msg "#### Done.\n"

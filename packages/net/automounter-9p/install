@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+mkdir -p $INSTALL/etc
+cp $ROOT/$PACKAGES/$PKG_SECTION/$PKG_NAME/config/9p $INSTALL/etc
+
+mkdir -p $INSTALL/usr/bin
+cp $ROOT/$PACKAGES/$PKG_SECTION/$PKG_NAME/scripts/automount_9p $INSTALL/usr/bin

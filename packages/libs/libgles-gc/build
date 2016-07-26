@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. config/options
+
+cd $BUILD/$1*
+
+mkdir -p .install/lib .install/include
+
+if [ "$ARM_HARDFLOAT_ABI" = yes ] ; then 
+  cp -P lib-hard/*.so* .install/lib
+else
+  cp -P lib-soft/*.so* .install/lib
+fi
+
+ln -sf libGLESv2x.so.1 .install/lib/libGLESv2.so
+cp -R include/* .install/include
+
+ln -sf .install .install-unstripped

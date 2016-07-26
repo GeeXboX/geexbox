@@ -1,0 +1,119 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+$SCRIPTS/installdev make
+$SCRIPTS/installdev sed
+
+do_unselect_opt () {
+  sed -i "s%^CONFIG_$1=.*%# CONFIG_$1 is not set%" $LINUX/.config
+}
+
+do_unselect () {
+  pkg_uses $1 $2 || \
+    sed -i "s%^CONFIG_$3=.*%# CONFIG_$3 is not set%" $LINUX/.config
+}
+
+#LINUX=`ls -d $ROOT/$BUILD/$1-[0-9]*`
+LINUX=`ls -d $ROOT/$BUILD/${PKG_NAME}-${PKG_VERSION}`
+
+case $TARGET_ARCH in
+  i386|x86_64)
+    TARGET_LINUX_ARCH=$TARGET_ARCH
+    ;;
+  powerpc|powerpc64)
+    TARGET_LINUX_ARCH=powerpc
+    ;;
+  arm)
+    TARGET_LINUX_ARCH=arm
+    ;;
+  *)
+    TARGET_LINUX_ARCH=$TARGET_ARCH
+    ;;
+esac
+
+# try to guess the appropriate kernel configuration file
+if [ -f $CONFIG_PLATFORM/$1.conf ]; then
+  KERNEL_CFG_FILE="$CONFIG_PLATFORM/$1.conf"
+elif [ -f $CONFIG_PLATFORM_GENERIC/$1.conf ]; then
+  echo "found $CONFIG_PLATFORM_GENERIC/$1.conf, using it"
+  KERNEL_CFG_FILE="$CONFIG_PLATFORM_GENERIC/$1.conf"
+fi
+
+if [ -f $CONFIG_MACHINE/$1.conf ] ; then
+  echo "found $CONFIG_MACHINE/$1.conf, using it"
+  KERNEL_CFG_FILE="$KERNEL_CFG_FILE $CONFIG_MACHINE/$1.conf"
+fi
+  
+if [ -f $CONFIG_FLAVOUR/$1.conf ] ; then
+  echo "found $CONFIG_FLAVOUR/$1.conf, usinng it"
+  KERNEL_CFG_FILE="$KERNEL_CFG_FILE $CONFIG_FLAVOUR/$1.conf"
+fi
+
+if [ -z "$KERNEL_CFG_FILE" ]; then
+  echo "Unable to find a matching kernel configuration file !!"
+  exit 1
+fi
+
+echo "Using kernel config from: $KERNEL_CFG_FILE"
+
+sed -i -e "s|^HOSTCC[[:space:]]*=.*$|HOSTCC = $HOST_CC|" \
+       -e "s|^HOSTCXX[[:space:]]*=.*$|HOSTCXX = $HOST_CXX|" \
+       -e "s|^ARCH[[:space:]]*?=.*$|ARCH = $TARGET_LINUX_ARCH|" \
+       -e "s|^CROSS_COMPILE[[:space:]]*?=.*$|CROSS_COMPILE = $TARGET_PREFIX|" \
+       $LINUX/Makefile
+
+$ROOT/$PACKAGES/$PKG_SECTION/$1/scripts/merge_config.sh -m -O $LINUX $KERNEL_CFG_FILE
+
+# conditionally unselect some components
+do_unselect $1 alsa       SND
+do_unselect $1 bluetooth  BT
+do_unselect $1 dab        DAB
+do_unselect $1 dvb        DVB_CORE
+do_unselect $1 ethernet   NET_ETHERNET
+do_unselect $1 hwmon      HWMON
+do_unselect $1 gameport   GAMEPORT
+do_unselect $1 intel      DRM_I810
+do_unselect $1 intel      DRM_I830
+do_unselect $1 intel      DRM_I915
+do_unselect $1 ipv6       IPV6
+do_unselect $1 lirc       RC_CORE
+do_unselect $1 lvm        MD
+do_unselect $1 mga        DRM_MGA
+do_unselect $1 mmc        MMC
+do_unselect $1 ms         MEMSTICK
+do_unselect $1 nouveau    DRM_NOUVEAU
+do_unselect $1 pata       ATA
+do_unselect $1 pccard     PCCARD
+do_unselect $1 poulsbo    STUB_POULSBO
+do_unselect $1 r128       DRM_R128
+do_unselect $1 radeon     DRM_RADEON
+do_unselect $1 radio      RADIO_ADAPTERS
+do_unselect $1 rtc        RTC
+do_unselect $1 sata       ATA
+do_unselect $1 savage     DRM_SAVAGE
+do_unselect $1 sis        DRM_SIS
+do_unselect $1 tdfx       DRM_TDFX
+do_unselect $1 tidsp      TIDSPBRIDGE
+do_unselect $1 unichrome  DRM_VIA
+do_unselect $1 usb        USB_SUPPORT
+do_unselect $1 usbnet     USB_USBNET
+do_unselect $1 v4l        VIDEO_DEV
+do_unselect $1 wifi       WIRELESS
+do_unselect $1 wifi       WIRELESS_EXT
+do_unselect $1 vmwgfx     DRM_VMWGFX
+
+if [ "$COMPRESSION_METHOD" = xz ]; then
+  do_unselect_opt KERNEL_GZIP
+  do_unselect_opt RD_GZIP
+elif [ "$COMPRESSION_METHOD" = gzip ]; then
+  do_unselect_opt KERNEL_XZ
+  do_unselect_opt RD_XZ
+  do_unselect_opt SQUASHFS_XZ
+  do_unselect_opt XZ_DEC
+fi
+
+yes '
+' | make -C $LINUX oldconfig
+make -C $LINUX prepare1

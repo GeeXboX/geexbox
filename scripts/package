@@ -12,25 +12,57 @@ add_control() {
   return 0
 }
 
+get_overlay() {
+  local pkg_name="$1"
+  local file_name="$2"
+  local overlay_name
+  if [ -r $PACKAGES/$PKG_SECTION/$pkg_name/$file_name ] ; then
+   overlay_name=$PACKAGES/$PKG_SECTION/$pkg_name/$file_name
+  else
+    overlay_name="$PACKAGES/$pkg_name/$file_name"
+  fi
+  local name_ends_with=`expr substr $file_name ${#file_name} 1`
+  local temp_name=""
+
+  # check for platform-specific package overlay
+  temp_name="$PLATFORM_PACKAGES/$pkg_name/$file_name"
+  if [ $name_ends_with = "/" ] ; then
+    [ -d "$temp_name" ] && overlay_name="$temp_name"
+  else
+    [ -r "$temp_name" ] && overlay_name="$temp_name"
+  fi
+
+  # check for machine-specific package overlay
+  temp_name="$MACHINE_PACKAGES/$pkg_name/$file_name"
+  if [ $name_ends_with = "/" ] ; then
+    [ -d "$temp_name" ] && overlay_name="$temp_name"
+  else
+    [ -r "$temp_name" ] && overlay_name="$temp_name"
+  fi
+
+  # check for flavour-specific package overlay
+  temp_name="$FLAVOUR_PACKAGES/$pkg_name/$file_name"
+  if [ $name_ends_with = "/" ] ; then
+    [ -d "$temp_name" ] && overlay_name="$temp_name"
+  else
+    [ -r "$temp_name" ] && overlay_name="$temp_name"
+  fi
+
+  echo $overlay_name
+}
+
 [ -n "$REPO" ] && $SCRIPTS/get-opk $1
 
 get_meta $1
 
-# check for platform-specific package overlay
-INSTALL_RULE=$PACKAGES/$1/install
-PLATFORM_INSTALL="$PLATFORM_PACKAGES/$1/install"
-[ -r "$PLATFORM_INSTALL" ] && INSTALL_RULE="$PLATFORM_INSTALL"
-MACHINE_INSTALL="$MACHINE_PACKAGES/$1/install"
-[ -r "$MACHINE_INSTALL" ] && INSTALL_RULE="$MACHINE_INSTALL"
-
-# check for flavour-specific package overlay
-FLAVOUR_INSTALL="$FLAVOUR_PACKAGES/$1/install"
-[ -r "$FLAVOUR_INSTALL" ] && INSTALL_RULE="$FLAVOUR_INSTALL"
 
 if [ "$PKG_OPK_ARCH" = unsupported ]; then
   echo "$1 is not supported on $TARGET_ARCH, aborting"
   exit 1
 fi
+
+# locate install script
+INSTALL_RULE=`get_overlay "$1" "install"`
 
 # build
 $SCRIPTS/build $1
@@ -69,56 +101,81 @@ for p in $PKG_RUN_DEPENDS; do
 done
 
 # install to staging
-if [ "$SYSTEMD" = yes -a -d $PACKAGES/$1/unit ]; then
-  mkdir -p $INSTALL/lib/systemd/system
-  for unit in $PACKAGES/$1/unit/*; do
-    cp $unit $INSTALL/lib/systemd/system
-    systemctl_enable `basename $unit` $INSTALL
-  done
+if [ "$SYSTEMD" = yes ]; then
+  SOURCE_PATH=`get_overlay "$1" "unit/"`
+  if [ -d $SOURCE_PATH ]; then
+    mkdir -p $INSTALL/lib/systemd/system
+    for unit in ${SOURCE_PATH}* ; do
+      cp $unit $INSTALL/lib/systemd/system
+      systemctl_enable `basename $unit` $INSTALL
+    done
+  fi
+
+  SOURCE_PATH=`get_overlay "$1" "tmpfiles.d/"`
+  if [ -d $SOURCE_PATH ]; then
+    mkdir -p $INSTALL/usr/lib/tmpfiles.d
+    cp ${SOURCE_PATH}*.conf $INSTALL/usr/lib/tmpfiles.d
+  fi
+
+  SOURCE_PATH=`get_overlay "$1" "modules-load.d/"`
+  if [ -d $SOURCE_PATH ]; then
+    mkdir -p $INSTALL/usr/lib/modules-load.d
+    cp ${SOURCE_PATH}*.conf $INSTALL/usr/lib/modules-load.d
+  fi
+
+  SOURCE_PATH=`get_overlay "$1" "sysctl.d/"`
+  if [ -d $SOURCE_PATH ]; then
+    mkdir -p $INSTALL/usr/lib/sysctl.d
+    cp ${SOURCE_PATH}*.conf $INSTALL/usr/lib/sysctl.d
+  fi
 fi
 
-if [ "$SYSTEMD" = yes -a -d $PACKAGES/$1/tmpfiles.d ]; then
-  mkdir -p $INSTALL/usr/lib/tmpfiles.d
-  cp $PACKAGES/$1/tmpfiles.d/*.conf $INSTALL/usr/lib/tmpfiles.d
-fi
-
-if [ "$SYSTEMD" = yes -a -d $PACKAGES/$1/modules-load.d ]; then
-  mkdir -p $INSTALL/usr/lib/modules-load.d
-  cp $PACKAGES/$1/modules-load.d/*.conf $INSTALL/usr/lib/modules-load.d
-fi
-
-if [ "$SYSTEMD" = yes -a -d $PACKAGES/$1/sysctl.d ]; then
-  mkdir -p $INSTALL/usr/lib/sysctl.d
-  cp $PACKAGES/$1/sysctl.d/*.conf $INSTALL/usr/lib/sysctl.d
-fi
-
-if [ -d $PACKAGES/$1/modprobe.d ]; then
+SOURCE_PATH=`get_overlay "$1" "modprobe.d/"`
+if [ -d $SOURCE_PATH ]; then
   mkdir -p $INSTALL/etc/modprobe.d
-  cp $PACKAGES/$1/modprobe.d/*.conf $INSTALL/etc/modprobe.d
+  cp ${SOURCE_PATH}*.conf $INSTALL/etc/modprobe.d
 fi
 
-if [ -d $PACKAGES/$1/profile.d ]; then
+SOURCE_PATH=`get_overlay "$1" "profile.d/"`
+if [ -d $SOURCE_PATH ]; then
   mkdir -p $INSTALL/etc/profile.d
-  cp $PACKAGES/$1/profile.d/*.sh $INSTALL/etc/profile.d
+  cp ${SOURCE_PATH}*.sh $INSTALL/etc/profile.d
 fi
 
 $INSTALL_RULE $1 >&$VERBOSE_OUT
 
 # build opk package
-[ -d $PACKAGES/$1/package ] && cp -P $PACKAGES/$1/package/* $INSTALL/CONTROL
+SOURCE_PATH=`get_overlay "$1" "package/"`
+if [ -d $SOURCE_PATH ]; then
+  for f in ${SOURCE_PATH}/*; do
+    if [ -h $f ] && [ $(dirname $(readlink $f)) = "." ]; then
+      ln -sf $PKG_NAME.$(readlink $f) $INSTALL/CONTROL/$(basename $f)
+    else
+      cp $f $INSTALL/CONTROL
+    fi
+  done
+fi
+
+if [ -n "$PKG_EPOCH" ]; then
+  OPK_VER_ID="${PKG_EPOCH}:${PKG_VERSION}-${PKG_REV}"
+elif [ "$PKG_URL_PROTO" = git ]; then
+  OPK_VER_ID="1:${PKG_VERSION}-${PKG_REV}"
+else
+  OPK_VER_ID="${PKG_VERSION}-${PKG_REV}"
+fi
 
 add_control "Package" "$PKG_NAME"
-add_control "Version" "${PKG_VERSION}-${PKG_REV}"
+add_control "Version" "${OPK_VER_ID}"
 add_control "Architecture" "$PKG_OPK_ARCH"
 add_control "Depends" "$PKG_OPK_DEPENDS"
 add_control "Priority" "$PKG_PRIORITY"
 add_control "Section" "$PKG_SECTION"
-add_control "Maintainer" "The OpenBricks Team (http://openbricks.org)"
-add_control "Source" "http://hg.openbricks.org/openbricks"
+add_control "Maintainer" "$DISTRO_MAINTAINER"
+add_control "Source" "$DISTRO_SOURCE"
 add_control "Description" "$PKG_SHORTDESC"
 
 if [ -n "$PKG_SHORTDESC" -a -n "$PKG_LONGDESC" ]; then
-  echo "$PKG_LONGDESC" | fmt | sed 's/^/  /g' >> \
+  echo "$PKG_LONGDESC" | sed 's/^ *//g' | fmt -w72 -u | sed 's/^/  /g' >> \
     $INSTALL/CONTROL/control
 
   # write enabled use flags in the package description
@@ -131,7 +188,7 @@ if [ -n "$PKG_SHORTDESC" -a -n "$PKG_LONGDESC" ]; then
   done
   if [ -n "$uses" ]; then
     echo "  ." >> $INSTALL/CONTROL/control
-    echo "Use flags: $uses" | fmt | sed 's/^/  /g' >> \
+    echo "Use flags: $uses" | fmt -w72 -u | sed 's/^/  /g' >> \
       $INSTALL/CONTROL/control
   fi
 fi
@@ -155,13 +212,13 @@ if [ -d "$DEBUGINFO" ]; then
 
   # build opk package
   add_control "Package" "${PKG_NAME}-dbg"
-  add_control "Version" "${PKG_VERSION}-${PKG_REV}"
+  add_control "Version" "${OPK_VER_ID}"
   add_control "Architecture" "$PKG_OPK_ARCH"
   add_control "Depends" "$PKG_NAME"
   add_control "Priority" "extra"
   add_control "Section" "debug"
-  add_control "Maintainer" "The OpenBricks Team (http://www.openbricks.org)"
-  add_control "Source" "http://hg.openbricks.org/openbricks"
+  add_control "Maintainer" "$DISTRO_MAINTAINER"
+  add_control "Source" "$DISTRO_SOURCE"
   add_control "Description" "debug symbols for $PKG_NAME"
   echo "This package contains debug data of the $PKG_NAME package. Most people will not need this package. Please install it to produce useful stacktraces to help debugging $PKG_NAME." | fmt | sed 's/^/  /g' >> $INSTALL/CONTROL/control
 
@@ -175,12 +232,12 @@ if [ -d "$DEBUGINFO" ]; then
 
   # build opk package
   add_control "Package" "${PKG_NAME}-dbg"
-  add_control "Version" "${PKG_VERSION}-${PKG_REV}dev${PKG_OPK_ARCH}"
+  add_control "Version" "${OPK_VER_ID}dev${PKG_OPK_ARCH}"
   add_control "Architecture" "`uname -m`"
   add_control "Priority" "extra"
   add_control "Section" "debug"
-  add_control "Maintainer" "The OpenBricks Team (http://www.openbricks.org)"
-  add_control "Source" "http://hg.openbricks.org/openbricks"
+  add_control "Maintainer" "$DISTRO_MAINTAINER"
+  add_control "Source" "$DISTRO_SOURCE"
   add_control "Description" "debug symbols for $PKG_NAME (devel version)"
 
   opkg-build -O -o root -g root $INSTALL $DEVPKGROOT >&$VERBOSE_OUT

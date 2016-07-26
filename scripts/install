@@ -9,7 +9,11 @@ STAMP=$ROOTFS/var/lib/opkg/info/$1.control
 PACKAGE=$PKGROOT/$PKG_OPK
 
 # check for platform-specific package overlay
-INSTALL_RULE=$PACKAGES/$1/install
+if [ -r $PACKAGES/$PKG_SECTION/$1/install ] ; then
+ INSTALL_RULE=$PACKAGES/$PKG_SECTION/$1/install
+else
+  INSTALL_RULE=$PACKAGES/$1/install
+fi
 PLATFORM_INSTALL="$PLATFORM_PACKAGES/$1/install"
 [ -r "$PLATFORM_INSTALL" ] && INSTALL_RULE="$PLATFORM_INSTALL"
 MACHINE_INSTALL="$MACHINE_PACKAGES/$1/install"
@@ -47,8 +51,9 @@ for p in $PKG_RUN_DEPENDS; do
   $SCRIPTS/install $p
 done
 
-if [ -f $PACKAGE ]; then
+if [ -f $PACKAGE ]; then                            
   $ROOT/$TOOLCHAIN/bin/opkg --offline-root $ROOTFS \
+                            --add-arch $PKG_OPK_ARCH:1 \
                             install $PACKAGE >&$VERBOSE_OUT
 
   # opkg installs the control file with the same timestamp of the package

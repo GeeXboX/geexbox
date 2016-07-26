@@ -36,8 +36,13 @@ case $TARGET_ARCH in
     	TARGET_ABI=eabi
     fi
     GCC_MARCH=yes
+    GCC_MTUNE=yes
     GCC_FAST_MATH=yes
     GCC_PIC=yes
+    ;;
+
+  arm64)
+    GCC_MARCH=yes
     ;;
 
   mips)
@@ -124,6 +129,7 @@ esac
 
 MARCH=$TARGET_SUBARCH
 [ "$TARGET_SUBARCH" = armv7 ] && MARCH=armv7-a
+[ "$TARGET_SUBARCH" = aarch64 ] && MARCH=armv8-a
 [ "$GCC_MARCH" = yes ] && \
   GCC_FLAGS="$GCC_FLAGS -march=$MARCH"
 
@@ -202,8 +208,20 @@ case "$FPU_OPTIMIZATIONS" in
     GCC_FLAGS="$GCC_FLAGS $ARM_FLOAT_ABI -mfpu=vfpv3-d16"
     ;;
 
+  vfp4)
+    GCC_FLAGS="$GCC_FLAGS $ARM_FLOAT_ABI -mfpu=vfpv4"
+    ;;
+
+  vfp4-d16)
+    GCC_FLAGS="$GCC_FLAGS $ARM_FLOAT_ABI -mfpu=vfpv4-d16"
+    ;;
+
   neon)
     GCC_FLAGS="$GCC_FLAGS $ARM_FLOAT_ABI -mfpu=neon"
+    ;;
+
+  neon-vfp4)
+    GCC_FLAGS="$GCC_FLAGS $ARM_FLOAT_ABI -mfpu=neon-vfpv4"
     ;;
 
   altivec)
@@ -241,12 +259,15 @@ GCC_FLAGS="$GCC_FLAGS -D_LARGEFILE_SOURCE"
 #################################
 
 if [ -z "$BUILD" ]; then
-  BUILD_BASE=build/build
-  BUILD=$BUILD_BASE.$TARGET_ARCH.$TARGET_LIBC
-  [ -n "$TARGET_PLATFORM" -a "$TARGET_PLATFORM" != generic ] && \
-    BUILD=$BUILD_BASE.$TARGET_PLATFORM.$TARGET_LIBC
-  [ -n "$TARGET_MACHINE" -a "$TARGET_MACHINE" != generic ] && \
-    BUILD=$BUILD_BASE.$TARGET_MACHINE.$TARGET_LIBC
+  if [ -z "$TARGET_LIBC" ]; then
+    BUILD=$BUILD_NOARCH
+  else
+    BUILD=$BUILD_BASE.$TARGET_ARCH.$TARGET_LIBC
+    [ -n "$TARGET_PLATFORM" -a "$TARGET_PLATFORM" != generic ] && \
+      BUILD=$BUILD_BASE.$TARGET_PLATFORM.$TARGET_LIBC
+    [ -n "$TARGET_MACHINE" -a "$TARGET_MACHINE" != generic ] && \
+      BUILD=$BUILD_BASE.$TARGET_MACHINE.$TARGET_LIBC
+  fi
 fi
 
 STAMPS=$BUILD/$STAMPS_NOARCH
@@ -368,5 +389,15 @@ set_ccache () {
 
 [ -z "$LOCAL_CC" ] && LOCAL_CC=`which gcc` || true
 [ -z "$LOCAL_CXX" ] && LOCAL_CXX=`which g++` || true
+
+
+####################################
+# Disable SITE_CONFIG for OpenSuse #
+####################################
+
+if [ -f /etc/SuSE-release ] ; then
+  export CONFIG_SITE=""
+fi
+
 
 return 0

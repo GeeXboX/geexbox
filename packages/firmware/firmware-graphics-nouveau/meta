@@ -1,0 +1,7 @@
+PKG_NAME=firmware-graphics-nouveau
+PKG_VERSION=20140228
+PKG_URL="$DISTRO_FW/Graphics/nouveau-firmware-${PKG_VERSION}.tar.xz"
+PKG_PRIORITY=optional
+PKG_SECTION=firmware
+PKG_SHORTDESC="Nouveau firmware"
+PKG_LONGDESC="Firmware for the nouveau Xorg driver."

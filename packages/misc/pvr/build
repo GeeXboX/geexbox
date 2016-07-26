@@ -1,0 +1,9 @@
+#!/bin/sh
+
+. config/options
+
+mkdir -p $BUILD/$1/.install/etc
+
+get_meta $1
+
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/pvr.conf $BUILD/$1/.install/etc

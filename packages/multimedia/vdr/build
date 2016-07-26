@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+export MAKEFLAGS=-j1
+require_cxx $1
+
+cd $PKG_BUILD_DIR
+cp $ROOT/$PACKAGES/$PKG_SECTION/$PKG_NAME/config/Make.config.$PKG_VERSION Make.config
+
+sed -i "s|#DVBDIR   =|DVBDIR=$SYSROOT_PREFIX/usr|" Make.config
+sed -i "s|#INCDIR       =|INCDIR=.install|" Make.config
+
+[ "$TARGET_LIBC" = "uclibc" ] && echo 'LIBS += -liconv' >>Make.config
+
+make && make include-dir # latter one to build extra plugins
+
+do_strip bin lib$1.so.*
+
+make_install

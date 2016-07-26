@@ -1,0 +1,14 @@
+#! /bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+# Disable OpenGL when not requested via config
+build_uses opengl || OPENGL_CONFIG="-DOPENGL_FOUND:BOOL=FALSE"
+
+do_cmake_build \
+  $OPENGL_CONFIG \
+  -DOVERRIDE_PATHS=1 \
+  -DCMAKE_MODULE_PATH=$LIB_PREFIX/lib/kodi

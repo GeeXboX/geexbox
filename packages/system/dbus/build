@@ -1,0 +1,66 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+export ac_cv_have_abstract_sockets=yes
+
+pkg_uses $1 xorg && WITH_XORG="--with-x" || WITH_XORG="--without-x"
+
+cd $PKG_BUILD_DIR
+
+mkdir -p objdir-host
+cd objdir-host
+do_configure host \
+            --disable-systemd \
+            --disable-tests \
+            --disable-ansi \
+            --disable-verbose-mode \
+            --disable-asserts \
+            --disable-checks \
+            --disable-xml-docs \
+            --disable-doxygen-docs \
+            --disable-compiler-coverage \
+            --enable-abstract-sockets \
+            --disable-selinux \
+            --disable-libaudit \
+            --disable-dnotify \
+            --enable-inotify \
+            --with-xml=expat \
+            --without-x \
+
+make
+make_install toolchain
+./.install/usr/bin/dbus-daemon --introspect > .install/usr/lib/dbus-1.0/introspect.xml
+cd ..
+
+mkdir -p objdir-target
+cd objdir-target
+do_configure \
+            --enable-systemd \
+            --disable-tests \
+            --disable-ansi \
+            --disable-verbose-mode \
+            --disable-asserts \
+            --disable-checks \
+            --disable-xml-docs \
+            --disable-doxygen-docs \
+            --disable-compiler-coverage \
+            --enable-abstract-sockets \
+            --disable-selinux \
+            --disable-libaudit \
+            --disable-dnotify \
+            --enable-inotify \
+            --with-xml=expat \
+            $WITH_XORG \
+            --with-session-socket-dir=/var/run/dbus \
+            --with-test-socket-dir=/var/run/dbus \
+            --with-system-pid-file=/var/run/dbus/pid \
+            --with-system-socket=/var/run/dbus/system_bus_socket \
+            --with-dbus-user=root \
+            --with-dbus-daemondir=/usr/bin \
+            --with-systemdsystemunitdir=/lib/systemd/system \
+
+make
+make_install

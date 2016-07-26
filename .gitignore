@@ -1,6 +1,8 @@
+fixme
 *.orig
 *.new
 .stamps
+*.swp
 /sources
 /build
 /binaries
@@ -12,3 +14,4 @@ config/options
 DOCS/docbook-xsl.css
 DOCS/*.html
 DOCS/*.pdf
+/binaries-dl

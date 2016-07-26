@@ -1,0 +1,55 @@
+#! /bin/sh
+
+export BUILD=$BUILD_NOARCH
+
+. config/options
+
+build_package () {
+  # rebuild internal libs
+  for cmd in clean build; do
+    for i in "m4" "gmp" "mpfr" "mpc"; do 
+      $SCRIPTS/$cmd internal-$i
+    done
+  done
+
+  get_meta internal-gmp
+  dir_internal_gmp=$ROOT/$PKG_BUILD_DIR/.install/usr
+
+  get_meta internal-mpfr
+  dir_internal_mpfr=$ROOT/$PKG_BUILD_DIR/.install/usr
+
+  get_meta internal-mpc
+  dir_internal_mpc=$ROOT/$PKG_BUILD_DIR/.install/usr
+
+  get_meta $1
+  cd $PKG_BUILD_DIR
+  setup_toolchain host
+
+  mkdir -p $1
+  cd $1
+
+  CC=$LOCAL_CC \
+  CXX=$LOCAL_CXX \
+  ../configure --with-gmp=$dir_internal_gmp   \
+               --with-mpfr=$dir_internal_mpfr \
+               --with-mpc=$dir_internal_mpc   \
+               --disable-multilib             \
+               --enable-shared                \
+               --disable-bootstrap
+
+  make
+
+  # install directly to $cache_dir
+  mkdir -p $2
+  make install DESTDIR="$2"
+
+  cd ..
+}
+
+# perform real build or restore cached copy
+do_cached_build $1
+
+# hack to enable build on 32bit systems...
+if [ ! -e .install/usr/local/lib64 ]; then
+  ln -s lib .install/usr/local/lib64
+fi

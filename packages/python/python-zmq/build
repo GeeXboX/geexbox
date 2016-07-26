@@ -1,0 +1,25 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+export LDSHARED="$CC -shared"
+
+echo "[global]
+have_sys_un_h = False
+
+[build_ext]
+libraries = python2.7
+library_dirs = $SYSROOT_PREFIX/usr/local/lib
+include_dirs = $SYSROOT_PREFIX/usr/local/include/python2.7
+
+[bdist_egg]
+plat-name = linux-armv
+" > setup.cfg
+
+do_python_make_cross -O1 --prefix /usr --root .install
+
+do_python_strip
+

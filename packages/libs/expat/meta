@@ -1,0 +1,10 @@
+PKG_NAME=expat
+PKG_VERSION=2.1.0
+PKG_URL="$SFNET_SRCS/expat/expat-${PKG_VERSION}.tar.gz"
+PKG_REV=1
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_PRIORITY=required
+PKG_SECTION=libs
+PKG_SHORTDESC="XML parsing C library"
+PKG_LONGDESC="This package contains the runtime, shared library of expat, the C library for parsing XML."

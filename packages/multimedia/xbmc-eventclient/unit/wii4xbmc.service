@@ -1,0 +1,11 @@
+[Unit]
+Description=wiiremote for xbmc
+After=bluetooth.service xbmc.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/start-wiiremote
+RemainAfterExit=yes
+
+[Install]
+WantedBy=bluetooth.target

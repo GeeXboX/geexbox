@@ -1,8 +1,0 @@
-[Socket]
-ListenStream=23
-Accept=yes
-EnvironmentFile=/etc/network
-ExecStartPre=/usr/bin/test ${TELNET_SERVER} = true
-
-[Install]
-WantedBy=sockets.target

@@ -1,0 +1,27 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+
+##hack
+pathlib=lib/perl/$PERL_V/auto/Tie/Hash/NamedCapture/NamedCapture.so
+mkdir -p target-lib
+cp $LIB_PREFIX/$pathlib target-lib
+cp $ROOT/$TOOLCHAIN/$pathlib $LIB_PREFIX/$pathlib
+
+do_perl_make EXPATLIBPATH=$LIB_PREFIX/lib
+make
+
+# restore lib
+cp target-lib/NamedCapture.so $LIB_PREFIX/$pathlib
+
+make_install
+
+# already installed
+rm .install/$PERL_SITELIB/perllocal.pod
+
+#do_perl_strip

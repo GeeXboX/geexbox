@@ -1,0 +1,59 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+mkdir -p objdir-host
+cd objdir-host
+setup_toolchain host
+cmake -DWITH_EMBEDDED_SERVER=no               \
+      -DWITH_JEMALLOC=no                      \
+      -DWITHOUT_TOKUDB=TRUE                   \
+      -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE \
+      -DGROFF=FALSE                           \
+      -DNROFF=FALSE                           \
+      -DENABLE_DTRACE=FALSE                   \
+      -DWITH_PIC=ON                           \
+      -DINSTALL_LAYOUT=RPM                    \
+      -DMYSQL_DATADIR:PATH=/var/mysql         \
+      -DCAT_EXECUTABLE=`which cat`            \
+      ..
+
+#  Only build what we need to build target
+for i in gen_lex_hash comp_err comp_sql; do
+  make $i
+done
+
+cd ..
+HOST_GEN_LEX_HASH="$ROOT/$PKG_BUILD_DIR/objdir-host/sql/gen_lex_hash"
+setup_toolchain target
+cmake -DCMAKE_SYSTEM_NAME=Linux               \
+      -DCMAKE_FIND_ROOT_PATH=$LIB_PREFIX      \
+      -DWITH_EMBEDDED_SERVER=no               \
+      -DWITH_JEMALLOC=no                      \
+      -DWITHOUT_TOKUDB=TRUE                   \
+      -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE \
+      -DGROFF=FALSE                           \
+      -DNROFF=FALSE                           \
+      -DENABLE_DTRACE=FALSE                   \
+      -DWITH_PIC=ON                           \
+      -DINSTALL_LAYOUT=RPM                    \
+      -DMYSQL_DATADIR:PATH=/var/mysql         \
+      -DCAT_EXECUTABLE=`which cat`            \
+      -DLIBEDIT_INTERFACE=TRUE                \
+      -DWITH_VALGRIND=FALSE                   \
+      -DSTACK_DIRECTION=-1                    \
+
+cp objdir-host/extra/comp_err $ROOT/$TOOLCHAIN/bin
+cp objdir-host/scripts/comp_sql $ROOT/$TOOLCHAIN/bin
+cp objdir-host/sql/gen_lex_hash $ROOT/$TOOLCHAIN/bin
+cp objdir-host/extra/comp_err extra
+cp objdir-host/scripts/comp_sql scripts
+
+make
+make_install
+
+sed -i -e "s,^pkglibdir=.*,pkglibdir=\'${LIB_PREFIX}/lib\'," .install/usr/bin/mysql_config
+sed -i -e "s,^pkgincludedir=.*,pkgincludedir=\'${LIB_PREFIX}/include/mysql\'," .install/usr/bin/mysql_config

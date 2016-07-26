@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+CFLAGS=$(echo $CFLAGS | sed -e "s%-ffast-math%%")
+CXXFLAGS=$(echo $CXXFLAGS | sed -e "s%-ffast-math%%")
+LDFLAGS=$(echo $LDFLAGS | sed -e "s%-ffast-math%%")
+
+do_python_make_cross -O1 --prefix /usr --root .install
+
+do_python_strip

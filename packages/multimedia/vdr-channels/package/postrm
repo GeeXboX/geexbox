@@ -1,0 +1,11 @@
+#! /bin/sh
+
+if [ "$1" = remove ]; then
+  # postrm
+  systemctl restart vdr.service
+else
+  # prerm
+  systemctl stop vdr.service
+fi
+
+exit 0

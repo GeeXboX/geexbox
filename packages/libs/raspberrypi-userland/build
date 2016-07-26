@@ -1,0 +1,32 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_cmake_build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_TOOLCHAIN_FILE=/dev/null \
+  -DVIDEOCORE_BUILD_DIR=$PWD/.build-vc
+
+install="$PWD/.install"
+cp -PR $install/opt/vc $install/usr
+
+if pkg_uses $1 devtools; then
+  debug="$PWD/.install-debuginfo/usr/lib/debug"
+
+  export CFLAGS="$CFLAGS -I$LIB_PREFIX/include/freetype2"
+  export LDFLAGS="$LDFLAGS -L${LIB_PREFIX}/lib -lfreetype -lz -lbz2"
+
+  export SDKSTAGE="$install"
+  export PREFIX=$SDKSTAGE
+  cd $SDKSTAGE/opt/vc/src/hello_pi
+  sh -e rebuild.sh
+
+  mkdir -p $debug
+  cp -PR hello_*/hello_*.bin $install/usr/bin
+  strip_bins $install/usr/bin $debug
+fi
+
+exit 0

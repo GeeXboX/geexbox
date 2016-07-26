@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. config/options
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+setup_toolchain host
+
+do_autoconf
+
+do_configure host \
+	--target=$TARGET_NAME \
+	--enable-interfaces="c,cxx" \
+	--with-gmp="$ROOT/$TOOLCHAIN" \
+
+make
+make_install toolchain

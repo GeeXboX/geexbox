@@ -1,0 +1,22 @@
+#! /bin/sh
+
+act_conf=/etc/vdr/channels.conf
+old_conf=/etc/vdr/channels.conf.old
+
+if [ "$1" = configure ]; then
+  # postinst
+  if [ -e $old_conf ]; then
+    grep -E '\:\[ ----------- Digitale Terrestre ------------- \]' -A 10000 $old_conf >> $act_conf
+    #grep  --after-context=100000  '\:\[ ----------- Digitale Terrestre ------------- \]' $old_conf >> $act_conf
+    rm -f $old_conf
+  fi
+
+  systemctl restart vdr.service
+else
+  # preinst
+  systemctl stop vdr.service
+
+  [ -e $act_conf ] && mv $act_conf $old_conf
+fi
+
+exit 0

@@ -1,0 +1,16 @@
+PKG_NAME=DirectFB
+PKG_VERSION=1.7.1
+PKG_URL="http://directfb.org/downloads/Core/DirectFB-1.7/DirectFB-${PKG_VERSION}.tar.gz"
+PKG_REV=1
+PKG_DEPENDS="zlib libjpeg-turbo libpng libgif freetype sysfsutils"
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_USE="xorg lirc touchscreen opengl opengles"
+PKG_DEPENDS_xorg="libX11 libXext"
+PKG_DEPENDS_lirc="lirc"
+PKG_DEPENDS_touchscreen="tslib"
+PKG_BUILD_DEPENDS_opengles="OpenGLES"
+PKG_PRIORITY=optional
+PKG_SECTION=libs
+PKG_SHORTDESC="direct frame buffer graphics"
+PKG_LONGDESC="DirectFB is a graphics library which was designed with embedded systems in mind. It offers maximum hardware accelerated performance at a minimum of resource usage and overhead."

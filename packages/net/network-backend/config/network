@@ -1,0 +1,65 @@
+# Network configuration
+
+# Backend software to use for network management (e.g. "connman, networkmanager,  udhcpc, none")
+NETWORK_BACKEND="none"
+
+# "LAN" or "WLAN" or "" (default is "" <--> "LAN")
+NETWORK="LAN"
+
+# Network interface name or address (e.g. "eth0" or "00:0d:56:ec:ba:0c")
+IFACE=""
+
+# Static IP address ("" for DHCP) in CIDR format (e.g. "192.168.1.1/24")
+ADDRESS=""
+
+# Network gateway (e.g. "192.168.1.254")
+GATEWAY=""
+
+# List of DNS servers (e.g. "192.168.1.253 192.168.1.254")
+# This will override the DNS servers from DHCP
+DNS_SERVER=""
+
+# WLAN network name
+SSID=""
+
+# Enable access hidden WLANs "true" or ""
+HIDDEN=""
+
+# "WEP" or "PSK" or "" or "RSN", set to "RSN" when your network uses WPA2 security
+SECURITY=""
+
+# WLAN password
+PASSPHRASE=""
+
+# set to "" to disable NTP
+TIMESERVERS="0.geexbox.pool.ntp.org 1.geexbox.pool.ntp.org 2.geexbox.pool.ntp.org 3.geexbox.pool.ntp.org"
+
+# Services to be started at boot time
+TELNET_SERVER="false"
+FTP_SERVER="false"
+HTTP_SERVER="false"
+SAMBA_SERVER="false"
+SSH_SERVER="false"
+
+# Use Zeroconf service discovery
+ZEROCONF="true"
+
+# Wait for network driver initialisation
+WAIT_FOR_SLOW_DEVICE="true"
+
+# Static Samba shares can be defined as shown in the commented examples below, 
+# where <%>,<@>,<&>,<#> field separators must be present as shown (Note that 
+# the password cannot contain  these special delimiters):
+# Change static value to "true" to enable this
+
+#STATIC_SMB="username<%>password<@>ip<&>myservername<#>share1<#>share2<#>share3"
+#STATIC_SMB="<%><@>ip<&>myservername<#>share1"
+static="false"
+
+
+# Dynamic Samba shares : use "SMB_USER" and "SMB_PWD" to automount all discovered shares
+# Change dynamic value to "true" to enable this
+#SMB_USER=""
+#SMB_PWD=""
+dynamic="false"
+

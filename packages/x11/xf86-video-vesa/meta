@@ -1,0 +1,11 @@
+PKG_NAME=xf86-video-vesa
+PKG_VERSION=2.3.4
+PKG_URL="http://xorg.freedesktop.org/archive/individual/driver/$PKG_NAME-$PKG_VERSION.tar.bz2"
+PKG_REV=1
+PKG_ARCH="i386 x86_64"
+PKG_BUILD_DEPENDS="toolchain xorg-server"
+PKG_RUN_DEPENDS="$TARGET_LIBC xorg-server"
+PKG_PRIORITY=optional
+PKG_SECTION=x11
+PKG_SHORTDESC="X.Org X server -- VESA display driver"
+PKG_LONGDESC="This driver for the X.Org X server uses the standard VESA interface provided on all video cards, but runs unaccelerated.  This driver is not recommended for use unless you have a problem  with the normal driver for your card, because it will peform very badly."

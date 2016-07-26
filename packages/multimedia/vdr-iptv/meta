@@ -1,0 +1,12 @@
+PKG_NAME=vdr-iptv
+#PKG_VERSION=1.2.0 #vdr 1.7.38
+#PKG_VERSION=2.0.3
+PKG_VERSION=2.2.0
+PKG_URL="http://www.saunalahti.fi/~rahrenbe/vdr/iptv/files/vdr-iptv-${PKG_VERSION}.tgz"
+PKG_REV=1
+PKG_BUILD_DEPENDS="toolchain vdr"
+PKG_RUN_DEPENDS="$TARGET_LIBC vdr"
+PKG_PRIORITY=optional
+PKG_SECTION=multimedia
+PKG_SHORTDESC="VDR -- iptv plugin"
+PKG_LONGDESC="vdr-iptv is a plugin for VDR, the Video Disk Recorder. This plugin integrates multicast IPTV transport streams seamlessly into VDR. You can use any IPTV channel like any other normal DVB channel for live viewing, recording, etc. The plugin also features full section filtering capabilities which allow for example EIT information to be extracted from the incoming stream."

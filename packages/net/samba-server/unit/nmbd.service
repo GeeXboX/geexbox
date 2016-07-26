@@ -1,0 +1,11 @@
+[Unit]
+Description=Samba NetBIOS Name Service
+ConditionPathExists=/run/geexbox/network/smbd
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/nmbd -F
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

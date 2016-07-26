@@ -1,0 +1,35 @@
+#!/bin/sh
+
+. config/options
+
+cd $BUILD/$1*
+
+cd $1-tools
+do_configure host \
+            --with-included-gettext \
+            --disable-dependency-tracking \
+            --disable-java \
+            --disable-native-java \
+            --disable-libasprintf \
+            --disable-csharp \
+            --disable-openmp \
+
+make
+make_install toolchain
+sed -i .install/usr/bin/autopoint -e "s:^prefix=.*\$:prefix=$ROOT/$TOOLCHAIN:"
+cd ..
+
+# make symlink to correctly populate -dbg package
+ln -sf $1-runtime objdir-target
+cd $1-runtime
+do_configure target \
+            --with-included-gettext \
+            --disable-dependency-tracking \
+            --disable-java \
+            --disable-native-java \
+            --disable-libasprintf \
+            --disable-csharp \
+
+make
+make_install
+chmod a+x .install/usr/lib/lib*.so*

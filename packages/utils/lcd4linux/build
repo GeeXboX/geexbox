@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+do_configure \
+            --without-x \
+            --without-ncurses \
+            --with-drivers=all
+
+
+
+make
+make_install

@@ -1,0 +1,14 @@
+PKG_NAME=s2-liplianin
+PKG_URL_REV=2c75558
+PKG_VERSION=v39+r${PKG_URL_REV}
+PKG_URL_PROTO=hg
+PKG_URL="https://bitbucket.org/CrazyCat/s2-liplianin-v39"
+#PKG_URL_REV=15392
+#PKG_VERSION=r${PKG_URL_REV}
+#PKG_URL_PROTO=hg
+#PKG_URL="http://mercurial.intuxication.org/hg/s2-liplianin"
+PKG_REV=1
+PKG_PRIORITY=optional
+PKG_SECTION=drivers
+PKG_SHORTDESC="DVB-S(S2) drivers for Linux - Igor M. Liplianin repo"
+PKG_LONGDESC="These are the Linux Media drivers maintained by Igor M. Liplianin - compared to mainline, these drivers add (experimental) support for a few more devices."

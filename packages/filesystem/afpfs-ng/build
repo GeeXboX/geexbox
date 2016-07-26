@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+export ac_cv_func_malloc_0_nonnull=yes
+do_autoconf
+do_configure
+
+make
+make_install
+
+mkdir -p .install/usr/include/afpfs-ng/ .install-unstripped/usr/include/afpfs-ng
+cp -r include/* .install/usr/include/afpfs-ng/
+cp -r include/* .install/usr/include/
+rm -f .install/usr/include/Makefile*
+
+cp -r include/* .install-unstripped/usr/include/afpfs-ng/
+cp -r include/* .install-unstripped/usr/include/
+rm -f .install/usr/include/Makefile*

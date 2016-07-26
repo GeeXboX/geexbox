@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_install usr/bin/nano
+do_install usr/share/nano
+
+mkdir -p $INSTALL/etc
+cp -P $ROOT/$PACKAGES/$PKG_SECTION/$1/config/nanorc $INSTALL/etc

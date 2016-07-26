@@ -1,0 +1,34 @@
+#!/bin/sh
+
+. config/options
+
+export ac_cv_sys_file_offset_bits=yes
+
+if pkg_uses $1 xorg; then
+  XORG_CONFIG="--with-x=yes"
+else
+  XORG_CONFIG="--with-x=no"
+fi
+
+if [ "$TOOLCHAIN_CXX" = yes ]; then
+  CXX_CONFIG="--with-magick-plus-plus=yes"
+else
+  CXX_CONFIG="--with-magick-plus-plus=no"
+fi
+
+cd $BUILD/$1*
+
+do_configure \
+            --with-modules=no \
+            --with-perl=no \
+            --with-zlib=yes \
+            --with-fontconfig=no \
+            --with-freetype=no \
+            --with-xml=no \
+            --with-tiff=yes \
+            --with-png=yes \
+            --with-jpeg=yes \
+            $XORG_CONFIG \
+            $CXX_CONFIG
+make
+make_install

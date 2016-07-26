@@ -1,0 +1,26 @@
+PKG_NAME=vlc
+PKG_VERSION=2.1.5
+PKG_URL="http://download.videolan.org/pub/videolan/vlc/$PKG_VERSION/vlc-$PKG_VERSION.tar.xz"
+PKG_REV=2
+PKG_DEPENDS="zlib ffmpeg freetype alsa-lib faad2 libpng dbus libcddb fontconfig libxml2 systemd libgcrypt gnutls sqlite libcdio libogg libvorbis libtheora libshout libass libmad"
+PKG_BUILD_DEPENDS="toolchain mpc"
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+
+PKG_USE="sdl xorg live openmax directfb pulseaudio devtools vaapi dvd dvb v4l crystalhd cedarx"
+PKG_DEPENDS_sdl="SDL SDL-image"
+PKG_DEPENDS_xorg="libX11 libXv libxcb xcb-util libXxf86vm mesa"
+PKG_BUILD_DEPENDS_live="live"
+PKG_BUILD_DEPENDS_openmax="OpenMAX"
+PKG_DEPENDS_directfb="DirectFB"
+PKG_DEPENDS_pulseaudio="pulseaudio"
+PKG_DEPENDS_vaapi="libva"
+PKG_DEPENDS_dvd="libdvdread libdvdnav"
+PKG_DEPENDS_dvb="libdvbpsi"
+PKG_DEPENDS_v4l="v4l-utils"
+PKG_DEPENDS_crystalhd="crystalhd"
+PKG_DEPENDS_cedarx="libcedarx"
+
+PKG_PRIORITY=optional
+PKG_SECTION=multimedia
+PKG_SHORTDESC="VideoLAN multimedia player and streamer"
+PKG_LONGDESC="VLC is the VideoLAN project's media player. It plays MPEG, MPEG2, MPEG4, DivX, MOV, WMV, QuickTime, mp3, Ogg/Vorbis files, DVDs, VCDs, and multimedia streams from various network sources."

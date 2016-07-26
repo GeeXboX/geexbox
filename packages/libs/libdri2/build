@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+export xorg_cv_malloc0_returns_null=false
+
+do_autoconf
+do_configure
+make
+make_install

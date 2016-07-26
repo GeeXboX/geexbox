@@ -1,0 +1,11 @@
+[Unit]
+Description=Video Disk Recorder
+After=lircd.service pvr.service
+ConditionPathExists=/run/geexbox/pvr/vdr
+
+[Service]
+ExecStart=/usr/sbin/runvdr
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

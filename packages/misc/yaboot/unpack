@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+cp $ROOT/$PACKAGES/$PKG_SECTION/$PKG_NAME/config/Config $BUILD/$1*/

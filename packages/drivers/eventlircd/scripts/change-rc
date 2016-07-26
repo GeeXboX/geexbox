@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Activate a keymap by placing a link to 
+# /etc/rc_keymaps/your_remote in $CONFDIR
+
+CONFDIR="/etc/rc_maps.d"
+
+for map in $CONFDIR/* ; do
+  if [ -r $map ] ; then
+    ir-keytable -w $map
+  else
+    echo "Keymap '$(basename $map)' not found in $(dirname $map) !"
+  fi
+done
+
+exit 0

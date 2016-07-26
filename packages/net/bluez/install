@@ -1,0 +1,35 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_install usr/lib/*.so*
+do_install usr/lib/bluez
+do_install usr/lib/systemd
+do_install usr/lib/bluetooth
+
+
+if pkg_uses $1 devtools; then
+  do_install usr/bin
+fi
+
+mkdir -p $INSTALL/etc/bluetooth
+cp -P src/main.conf $INSTALL/etc/bluetooth
+
+mkdir -p $INSTALL/etc/udev/rules.d/
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/bluetooth.rules $INSTALL/etc/udev/rules.d/30-bt.rules
+
+mkdir -p $INSTALL/usr/bin
+cp $ROOT/$PACKAGES/$PKG_SECTION/$1/config/brcm43xx-bt-attach $INSTALL/usr/bin
+
+do_install lib/udev
+do_install etc
+do_install usr/share/dbus-1
+
+#mask dbus alias to prevent networkmanager for starting it
+systemctl_mask dbus-org.bluez.service $INSTALL
+
+# mask bluetooth-setup by default
+systemctl_mask bluetooth-setup.service $INSTALL

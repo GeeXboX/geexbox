@@ -1,0 +1,10 @@
+PKG_NAME=fuse
+PKG_VERSION=2.9.4
+PKG_URL="https://github.com/libfuse/libfuse/releases/download/${PKG_NAME}_$(echo $PKG_VERSION | sed -e "s/\./_/g")/$PKG_NAME-$PKG_VERSION.tar.gz"
+PKG_REV=1
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_PRIORITY=optional
+PKG_SECTION=filesystem
+PKG_SHORTDESC="Filesystem in USErspace"
+PKG_LONGDESC="Simple interface for userspace programs to export a virtual filesystem to the Linux kernel."

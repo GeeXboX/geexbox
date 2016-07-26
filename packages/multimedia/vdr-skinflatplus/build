@@ -1,0 +1,36 @@
+
+#!/bin/sh
+
+. config/options
+
+get_meta vdr
+VDR_VERSION=$PKG_VERSION
+
+get_meta linux
+verlte 3.6.11 $PKG_VERSION && INSDVB="yes" || INSDVB="no"
+if [ $INSDVB = "no" ]; then
+   DVB_DIR="$SYSROOT_PREFIX/usr/include"
+else
+   DVB_DIR="../linux"
+fi
+
+get_meta $1
+VDR_DIR=`basename $BUILD/vdr-$VDR_VERSION`
+
+cd $PKG_BUILD_DIR
+
+make all \
+  VDRDIR="../$VDR_DIR" \
+  DVBDIR=$DVB_DIR \
+  LIBDIR="." \
+  LOCALEDIR="./locale" \
+
+make_install
+rm -rf .install-debuginfo || true
+
+ln -s system_information.g2v .install/usr/lib/vdr/plugins/skinflatplus/widgets/system_information/system_information
+ln -s command.example .install/usr/lib/vdr/plugins/skinflatplus/widgets/command_output/command 
+ln -s system_update_status.ubuntu .install/usr/lib/vdr/plugins/skinflatplus/widgets/system_updatestatus/system_update_status
+ln -s temperatures.g2v .install/usr/lib/vdr/plugins/skinflatplus/widgets/temperatures/temperatures
+ln -s update_weather.config.sample .install/usr/lib/vdr/plugins/skinflatplus/widgets/weather/update_weather.config
+

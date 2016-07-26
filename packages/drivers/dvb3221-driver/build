@@ -1,0 +1,26 @@
+#!/bin/sh
+
+. config/options
+
+$SCRIPTS/build linux
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+make \
+  KDIR=$(kernel_path) \
+  KERNELRELEASE=$(kernel_version) \
+  SRCDIR=$(kernel_path) \
+  OUTDIR=$(kernel_path) \
+
+install_dir="$PWD/.install/lib/modules/$(kernel_version)"
+debug_dir="$PWD/.install-debuginfo/usr/lib/debug"
+
+mkdir -p $install_dir $debug_dir
+mkdir -p $install_dir/kernel/drivers/media/dvb/frontends
+mkdir -p $install_dir/kernel/drivers/media/dvb/dvb-usb
+
+cp frontends/*.ko $install_dir/kernel/drivers/media/dvb/frontends
+cp dvb-usb/dvb3221.ko $install_dir/kernel/drivers/media/dvb/dvb-usb
+
+strip_kmods "$install_dir" "$debug_dir"

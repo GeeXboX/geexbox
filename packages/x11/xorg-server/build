@@ -1,0 +1,89 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+$SCRIPTS/unpack mesa
+
+cd $PKG_BUILD_DIR
+
+OPT_IPV6="--disable-ipv6"
+if pkg_uses linux ipv6 ; then 
+  OPT_IPV6="--enable-ipv6"
+fi
+
+do_autoconf
+
+export LIBS="-ludev"
+GCC_NO_GOLD=1 GCC_NO_LTO=1 \
+do_configure \
+            --enable-largefile \
+            --disable-strict-compilation \
+            --disable-debug \
+            --disable-docs \
+            --disable-devel-docs \
+            --without-doxygen \
+            --without-fop \
+            --without-xmlto \
+            --without-dtrace \
+            --disable-install-libxf86config \
+            --enable-mitshm \
+            --enable-aiglx \
+            --enable-glx-tls \
+            --enable-registry \
+            --enable-composite \
+            --enable-xres \
+            --enable-record \
+            --enable-xv \
+            --enable-xvmc \
+            --enable-dga \
+            --enable-screensaver \
+            --disable-xdmcp \
+            --disable-xdm-auth-1 \
+            --enable-glx \
+            --enable-dri \
+            --enable-dri2 \
+            --enable-gestures \
+            --enable-xinerama \
+            --enable-xf86vidmode \
+            --enable-xace \
+            --disable-xselinux \
+            --enable-xcsecurity \
+            --disable-xcalibrate \
+            --disable-tslib \
+            --enable-dbe \
+            --disable-xf86bigfont \
+            --enable-dpms \
+            --disable-config-dbus \
+            --enable-config-udev \
+            --disable-config-hal \
+            --enable-xfree86-utils \
+            --enable-xorg \
+            --disable-dmx \
+            --enable-xvfb \
+            --disable-xnest \
+            --disable-xquartz \
+            --disable-standalone-xpbproxy \
+            --disable-xwin \
+            --disable-kdrive \
+            --disable-xephyr \
+            --disable-xfake \
+            --enable-xfbdev \
+            --disable-install-setuid \
+            --disable-secure-rpc \
+            $OPT_IPV6 \
+            --with-os-vendor="OpenBricks" \
+            --with-int10=x86emu \
+            --with-module-dir=$XORG_PATH_MODULES \
+            --with-xkb-path=$XORG_PATH_XKB \
+            --with-xkb-output=$XORG_PATH_XKB_CACHE \
+            --with-log-dir=/var/log \
+            --with-fontrootdir=$XORG_PATH_FONTS \
+            --with-default-font-path="$XORG_PATH_FONTS/misc,built-ins" \
+            --with-sha1=libgcrypt \
+
+make V=1
+make_install
+mkdir -p .install/usr/lib/mesa
+cp -P .install/$XORG_PATH_MODULES/extensions/libglx.so .install/usr/lib/mesa

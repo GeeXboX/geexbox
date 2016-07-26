@@ -1,0 +1,24 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+mkdir $INSTALL/etc
+cp -P $ROOT/$PACKAGES/$PKG_SECTION/$1/config/network* $INSTALL/etc
+
+NET=$INSTALL/etc/network
+[ -n "$NETWORK_BACKEND" ] && \
+  sed -i "s/^NETWORK_BACKEND=.*/NETWORK_BACKEND=\"$NETWORK_BACKEND\"/" $NET && \
+  sed -i "s/^NETWORK_BACKEND=.*/NETWORK_BACKEND=\"$NETWORK_BACKEND\"/" ${NET}2
+
+for service in "TELNET" "HTTP" "FTP" "SSH" "SAMBA" ; do
+  key="${service}_SERVER"
+  eval enabled="\$$key"
+
+  [ "$enabled" = yes ] && sed -i "s/^${key}=.*/${key}=\"true\"/" $NET 
+done
+
+cat > $INSTALL/etc/issue <<EOF
+Welcome to $DISTRONAME $TARGET_ARCH $DISTRO_VERSION $DISTRO_COPYRIGHT
+EOF

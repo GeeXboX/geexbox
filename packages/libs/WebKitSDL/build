@@ -1,0 +1,39 @@
+#!/bin/sh
+
+. config/options
+
+cd $BUILD/$1*
+
+sed -i Source/ThirdParty/skia/Makefile \
+  -e "s|^CFLAGS :=\(.*\)$|CFLAGS := $CFLAGS \1|" \
+  -e "s|-I/usr/include/freetype2|-I$LIB_PREFIX/include/freetype2|"
+(cd Source/ThirdParty/skia; make CC="$CC" GPP="$CXX")
+
+mkdir -p WebKitBuild
+cd WebKitBuild
+cmake \
+  -DCMAKE_FIND_ROOT_PATH=$LIB_PREFIX \
+  -DCMAKE_INSTALL_PREFIX=/usr \
+  -DPORT=SDL \
+  ../Source
+
+make
+make_install
+
+mkdir -p .install/usr/include/webkit-sdl
+cp -P ../Source/WebKit/sdl/include/* .install/usr/include/webkit-sdl
+
+mkdir -p .install/usr/lib/pkgconfig
+cat > .install/usr/lib/pkgconfig/webkit-sdl.pc <<EOF
+prefix=$LIB_PREFIX
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: webkit-sdl
+Description: Web content engine for SDL
+Version: 0.1.0
+Requires: libxml-2.0 sdl sqlite3
+Libs: -L\${libdir} -lwebkit_sdl
+Cflags: -I\${includedir}/webkit-sdl
+EOF

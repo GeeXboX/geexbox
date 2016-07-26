@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. config/options
+
+$SCRIPTS/build linux
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+OPT_IPV6="--disable-ipv6"
+if pkg_uses linux ipv6 ; then 
+  OPT_IPV6="--enable-ipv6"
+fi
+
+do_autoconf
+do_configure \
+            --enable-devel \
+            $OPT_IPV6 \
+
+make
+make_install

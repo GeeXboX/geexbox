@@ -1,9 +1,0 @@
-#!/bin/sh
-
-. /etc/wii.conf
-
-if [ -n "$WIIR_MAC" ] ; then
-  xbmc-wiiremote --btaddr $WIIR_MAC &
-fi
-
-exit 0

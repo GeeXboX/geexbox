@@ -1,0 +1,19 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+export TARGET_LDFLAGS="$TARGET_LDFLAGS -lstdc++"
+
+do_cmake_build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DFFMPEG_ROOT=$LIB_PREFIX  \
+  -DFFMPEG_STDINT_INCLUDE_DIR=$LIB_PREFIX/include \
+  -DBUILD_TOOLS=ON \
+  -DBUILD_EXAMPLES=ON \
+  -DBUILD_TESTS=OFF
+
+cp .build/tools/fpcollect .install/usr/bin
+strip_bins .install/usr/bin

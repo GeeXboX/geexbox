@@ -1,0 +1,22 @@
+PKG_NAME=xine-lib
+PKG_VERSION="1.2.6"
+PKG_URL_REV="a7822d3"
+PKG_URL_PROTO=git
+PKG_URL="git://projects.vdr-developer.org/xine-lib.git"
+PKG_REV=1
+PKG_BUILD_DEPENDS="toolchain"
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_DEPENDS="zlib ffmpeg freetype alsa-lib libglu"
+
+PKG_USE="uclibc vdpau xorg sdl vdr"
+PKG_USE_NAME_vdr="VDR"
+PKG_DEPENDS_vdr="libjpeg-turbo"
+PKG_DEPENDS_uclibc="libiconv"
+PKG_BUILD_DEPENDS_vdpau="libvdpau"
+PKG_DEPENDS_xorg="libX11 libxcb libXext libXv mesa"
+PKG_DEPENDS_sdl="SDL"
+
+PKG_PRIORITY=optional
+PKG_SECTION=multimedia
+PKG_SHORTDESC="the xine video/media player library"
+PKG_LONGDESC="This is the xine media player library (libxine). Libxine provides the complete infrastructure for a video/media player. It supports MPEG 1/2 and some AVI and Quicktime videos out of the box, so you can use it to play DVDs, (S)VCDs and most video files out there. It supports network streams, subtitles and even MP3 or Ogg files. It's extensible to your heart's content via plugins for audio and video output, input media, demuxers (stream types), audio/video and subtitle codecs."

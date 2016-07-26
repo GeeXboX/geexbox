@@ -1,0 +1,9 @@
+PKG_NAME=klibc
+PKG_VERSION=2.0.3
+PKG_URL="https://www.kernel.org/pub/linux/libs/klibc/2.0/klibc-${PKG_VERSION}.tar.xz"
+PKG_REV=1
+PKG_BUILD_DEPENDS="gcc-core linux-headers"
+PKG_PRIORITY=required
+PKG_SECTION=system
+PKG_SHORTDESC="klibc is a minimalistic subset of the standard C library"
+PKG_LONGDESC="klibc was developed mainly to be used during the Linux startup process, and it is part of the early user space, i.e. components used during kernel startup, but which do not run in kernel mode."

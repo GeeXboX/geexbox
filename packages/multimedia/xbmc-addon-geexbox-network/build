@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+ADDON_BASE=.install/usr/share/$MEDIA_CENTER_FRONTEND/addons
+
+mkdir -p $ADDON_BASE
+cp -R geexbox.network.cfg $ADDON_BASE

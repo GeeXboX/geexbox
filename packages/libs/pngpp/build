@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+rm -rf .install
+
+export PREFIX=".install/usr"
+#make MAKEFLAGS=""
+
+make_install 

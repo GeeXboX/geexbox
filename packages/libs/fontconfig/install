@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+
+cd $PKG_BUILD_DIR
+
+cd objdir-target
+do_install usr/bin
+do_install usr/lib/libfontconfig.so*
+do_install etc/fonts
+do_install usr/share

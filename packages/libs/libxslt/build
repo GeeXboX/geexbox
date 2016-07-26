@@ -1,0 +1,26 @@
+#!/bin/sh
+
+. config/options
+
+get_meta $1
+cd $PKG_BUILD_DIR
+
+do_configure host \
+                 --without-crypto \
+                 --without-python
+make
+make_install toolchain
+
+rm -rf objdir-host
+mkdir -p objdir-host
+mv .install objdir-host
+make clean
+
+export ac_cv_path_XSLTPROC="$ROOT/$PKG_BUILD_DIR/objdir-host/.install/usr/bin/xsltproc"
+
+do_configure target \
+            --without-crypto \
+            --without-python
+sed -i "s%^prefix=.*%prefix=$LIB_PREFIX%" xslt-config
+make
+make_install

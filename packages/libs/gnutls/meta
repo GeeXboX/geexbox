@@ -1,0 +1,11 @@
+PKG_NAME=gnutls
+PKG_VERSION=3.3.19
+PKG_URL="ftp://ftp.gnutls.org/gcrypt/${PKG_NAME}/v$(version_strip_minor)/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_REV=2
+PKG_DEPENDS="zlib cryptodev nettle"
+PKG_BUILD_DEPENDS="toolchain"
+PKG_RUN_DEPENDS="$TARGET_LIBC"
+PKG_PRIORITY=standard
+PKG_SECTION=libs
+PKG_SHORTDESC="The GNU TLS library - runtime library"
+PKG_LONGDESC="gnutls is a portable library which implements the Transport Layer Security (TLS) 1.0 and Secure Sockets Layer (SSL) 3.0 protocols."
