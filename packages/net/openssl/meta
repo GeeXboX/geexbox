@@ -1,7 +1,7 @@
 PKG_NAME=openssl
-PKG_VERSION=1.0.2h
+PKG_VERSION=1.0.2j
 PKG_URL="http://www.openssl.org/source/${PKG_NAME}-${PKG_VERSION}.tar.gz"
-PKG_REV="3"
+PKG_REV="1"
 PKG_DEPENDS="zlib cryptodev"
 PKG_RUN_DEPENDS="$TARGET_LIBC openssl-certs"
 PKG_BUILD_DEPENDS="toolchain makedepend"
@@ -10,3 +10,4 @@ PKG_SECTION=libs
 PKG_SHORTDESC="Secure Socket Layer (SSL) library"
 PKG_LONGDESC="This is the OpenSSL implementation of Secure Socket Layer (SSL)."
 PKG_SECTION=net
+PKG_MD5="96322138f0b69e61b7212bc53d5e912b"

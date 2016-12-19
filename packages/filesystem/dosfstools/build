@@ -2,11 +2,11 @@
 
 . config/options
 
-cd $BUILD/$1*
+get_meta $1
 
-setup_toolchain host
+cd $PKG_BUILD_DIR
 
-make mkdosfs
+do_configure --enable-compat-symlinks
 
-mkdir -p .install/usr/bin
-cp -P mkdosfs .install/usr/bin
+make
+make_install

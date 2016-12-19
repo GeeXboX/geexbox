@@ -1,0 +1,68 @@
+From 3332675598920607341192aea43a26e3ad0c1cfd Mon Sep 17 00:00:00 2001
+From: Rudi <r.ihle@s-t.de>
+Date: Thu, 18 Aug 2016 19:24:32 +0200
+Subject: [PATCH 100/101] mach-dove: Unify GPU and VPU memory size setup
+
+Signed-off-by: Rudi <r.ihle@s-t.de>
+---
+ arch/arm/mach-dove/common.c | 24 +++++++++++-------------
+ 1 file changed, 11 insertions(+), 13 deletions(-)
+
+diff --git a/arch/arm/mach-dove/common.c b/arch/arm/mach-dove/common.c
+index b3612d0..8366c61 100644
+--- a/arch/arm/mach-dove/common.c
++++ b/arch/arm/mach-dove/common.c
+@@ -91,17 +91,14 @@ void __init dove_map_io(void)
+ #define UIO_DOVE_VMETA_MEM_SIZE 0
+ #endif
+ 
+-unsigned int vmeta_size = UIO_DOVE_VMETA_MEM_SIZE;
++static unsigned int vmeta_size = UIO_DOVE_VMETA_MEM_SIZE;
+ 
+ static int __init vmeta_size_setup(char *str)
+ {
+-	get_option(&str, &vmeta_size);
+-
+-	if (!vmeta_size)
+-		return 1;
+-
+-	vmeta_size <<= 20;
+-
++	if (get_option(&str, &vmeta_size) == 1)
++		vmeta_size <<= 20;
++	else
++		vmeta_size = UIO_DOVE_VMETA_MEM_SIZE;
+ 	return 1;
+ }
+ __setup("vmeta_size=", vmeta_size_setup);
+@@ -176,14 +173,14 @@ EXPORT_SYMBOL(dove_vmeta_get_memory_size);
+ #define DOVE_GPU_MEM_SIZE 0
+ #endif
+ 
+-unsigned int __initdata gpu_size = DOVE_GPU_MEM_SIZE;
++static unsigned int gpu_size = DOVE_GPU_MEM_SIZE;
+ 
+ static int __init gpu_size_setup(char *str)
+ {
+-	get_option(&str, &gpu_size);
+-	if (!gpu_size)
+-		return 1;
+-	gpu_size <<= 20;
++	if (get_option(&str, &gpu_size) == 1)
++		gpu_size <<= 20;
++	else
++		gpu_size = DOVE_GPU_MEM_SIZE;
+ 	return 1;
+ }
+ __setup("gpu_size=", gpu_size_setup);
+@@ -234,6 +231,7 @@ unsigned int dove_gpu_get_memory_start(void)
+ 	return dove_gpu_memory_start;
+ }
+ EXPORT_SYMBOL(dove_gpu_get_memory_start);
++
+ int dove_gpu_get_memory_size(void)
+ {
+ 	return gpu_size;
+-- 
+1.9.1
+
