@@ -1,0 +1,98 @@
+From e243e047f140f5a1eb329a072a4a5f0e9ba0f2e4 Mon Sep 17 00:00:00 2001
+From: warped-rudi <r.ihle@s-t.de>
+Date: Thu, 16 Mar 2017 09:30:41 +0100
+Subject: [PATCH] Dove: Modify windowing
+
+---
+ xbmc/windowing/X11/WinSystemX11.cpp |   25 ++++++++++++++++++-------
+ xbmc/windowing/X11/WinSystemX11.h   |    6 ++++++
+ 2 files changed, 24 insertions(+), 7 deletions(-)
+
+diff --git a/xbmc/windowing/X11/WinSystemX11.cpp b/xbmc/windowing/X11/WinSystemX11.cpp
+index 134c498..b081c53 100644
+--- a/xbmc/windowing/X11/WinSystemX11.cpp
++++ b/xbmc/windowing/X11/WinSystemX11.cpp
+@@ -48,6 +48,16 @@
+ 
+ #define EGL_NO_CONFIG (EGLConfig)0
+ 
++/* Dove GL engine doesn't like the following. Probably EGL_NO_CONTEXT flag */
++#ifndef HAS_MARVELL_DOVE
++  #define eglRelease(disp, ctx) eglMakeCurrent(disp, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT)
++  #define DEPTH_SIZE 24
++#else
++  #define eglRelease(disp, ctx) eglMakeCurrent(disp, EGL_NO_SURFACE, EGL_NO_SURFACE, ctx)
++  #define DEPTH_SIZE 16
++#endif
++
++
+ CWinSystemX11::CWinSystemX11() : CWinSystemBase()
+ {
+   m_eWindowSystem = WINDOW_SYSTEM_X11;
+@@ -126,7 +136,8 @@ bool CWinSystemX11::DestroyWindowSystem()
+   {
+     if (m_eglContext != EGL_NO_CONTEXT)
+     {
+-      eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
++      eglRelease(m_eglDisplay, m_eglContext);
++      eglDestroyContext(m_eglDisplay, m_eglContext);
+       m_eglContext = EGL_NO_CONTEXT;
+     }
+   }
+@@ -161,7 +172,7 @@ bool CWinSystemX11::DestroyWindow()
+   if (m_eglContext)
+   {
+     glFinish();
+-    eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
++    eglRelease(m_eglDisplay, m_eglContext);
+   }
+ #endif
+ 
+@@ -494,7 +505,7 @@ EGLConfig getEGLConfig(EGLDisplay eglDisplay, XVisualInfo *vInfo)
+ {
+   EGLint attributes[] =
+   {
+-    EGL_DEPTH_SIZE, 24,
++    EGL_DEPTH_SIZE, DEPTH_SIZE,
+     EGL_NONE
+   };
+   EGLint numConfigs;
+@@ -581,7 +592,7 @@ bool CWinSystemX11::IsSuitableVisual(XVisualInfo *vInfo)
+     return false;
+   if (!eglGetConfigAttrib(m_eglDisplay, config, EGL_ALPHA_SIZE, &value) || value < 8)
+     return false;
+-  if (!eglGetConfigAttrib(m_eglDisplay, config, EGL_DEPTH_SIZE, &value) || value < 24)
++  if (!eglGetConfigAttrib(m_eglDisplay, config, EGL_DEPTH_SIZE, &value) || value < 8)
+     return false;
+  
+ #endif
+@@ -606,7 +617,7 @@ bool CWinSystemX11::RefreshGlxContext(bool force)
+   if (m_eglContext && !force)
+   {
+     CLog::Log(LOGDEBUG, "CWinSystemX11::RefreshGlxContext: refreshing context");
+-    eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
++    eglRelease(m_eglDisplay, m_eglContext);
+     eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface, m_eglContext);
+     return true;
+   }
+@@ -686,7 +697,7 @@ bool CWinSystemX11::RefreshGlxContext(bool force)
+ #if defined(HAS_EGL)
+     if (m_eglContext)
+     {
+-      eglMakeCurrent(m_eglContext, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
++      eglRelease(m_eglDisplay, m_eglContext);
+       eglDestroyContext(m_eglDisplay, m_eglContext);
+       m_eglContext = EGL_NO_CONTEXT;
+       eglDestroySurface(m_eglDisplay, m_eglSurface);
+@@ -1044,7 +1055,7 @@ bool CWinSystemX11::SetWindow(int width, int height, bool fullscreen, const std:
+       EGL_BLUE_SIZE, 8,
+       EGL_ALPHA_SIZE, 8,
+       EGL_BUFFER_SIZE, 32,
+-      EGL_DEPTH_SIZE, 24,
++      EGL_DEPTH_SIZE, DEPTH_SIZE,
+       EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+       EGL_NONE
+     };
+-- 
+1.7.9.5
+

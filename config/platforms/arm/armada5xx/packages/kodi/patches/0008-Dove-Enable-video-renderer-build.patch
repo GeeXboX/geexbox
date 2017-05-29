@@ -1,0 +1,89 @@
+From f615e07770653c0cb7439494991e7f7ad4b7c6c5 Mon Sep 17 00:00:00 2001
+From: warped-rudi <r.ihle@s-t.de>
+Date: Thu, 16 Mar 2017 09:30:42 +0100
+Subject: [PATCH] Dove: Enable video renderer build
+
+---
+ xbmc/cores/VideoRenderers/Makefile.in           |    6 +++++-
+ xbmc/cores/VideoRenderers/OverlayRendererGL.cpp |    2 ++
+ xbmc/cores/VideoRenderers/RenderManager.cpp     |    4 ++++
+ xbmc/cores/VideoRenderers/RenderManager.h       |    3 +++
+ 4 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/xbmc/cores/VideoRenderers/Makefile.in b/xbmc/cores/VideoRenderers/Makefile.in
+index 7fcc322..a3b86ec 100644
+--- a/xbmc/cores/VideoRenderers/Makefile.in
++++ b/xbmc/cores/VideoRenderers/Makefile.in
+@@ -16,8 +16,12 @@ SRCS += OverlayRendererGL.cpp
+ endif
+ 
+ ifeq (@USE_OPENGLES@,1)
+-SRCS += LinuxRendererGLES.cpp
+ SRCS += OverlayRendererGL.cpp
++ifeq (@USE_MARVELL_DOVE@,1)
++SRCS += DoveOverlayRenderer.cpp
++else
++SRCS += LinuxRendererGLES.cpp
++endif
+ endif
+ 
+ ifeq (@USE_MMAL@,1)
+diff --git a/xbmc/cores/VideoRenderers/OverlayRendererGL.cpp b/xbmc/cores/VideoRenderers/OverlayRendererGL.cpp
+index 0fe125a..3ee8d2e 100644
+--- a/xbmc/cores/VideoRenderers/OverlayRendererGL.cpp
++++ b/xbmc/cores/VideoRenderers/OverlayRendererGL.cpp
+@@ -25,6 +25,8 @@
+ #include "OverlayRendererGL.h"
+ #ifdef HAS_GL
+   #include "LinuxRendererGL.h"
++#elif defined(HAS_MARVELL_DOVE)
++  #include "DoveOverlayRenderer.h"
+ #elif HAS_GLES == 2
+   #include "LinuxRendererGLES.h"
+ #endif
+diff --git a/xbmc/cores/VideoRenderers/RenderManager.cpp b/xbmc/cores/VideoRenderers/RenderManager.cpp
+index 7a99ac4..14a5eb2 100644
+--- a/xbmc/cores/VideoRenderers/RenderManager.cpp
++++ b/xbmc/cores/VideoRenderers/RenderManager.cpp
+@@ -43,6 +43,8 @@
+   #include "LinuxRendererGL.h"
+ #elif defined(HAS_MMAL)
+   #include "MMALRenderer.h"
++#elif defined(HAS_MARVELL_DOVE)
++  #include "DoveOverlayRenderer.h"
+ #elif HAS_GLES == 2
+   #include "LinuxRendererGLES.h"
+ #elif defined(HAS_DX)
+@@ -453,6 +455,8 @@ unsigned int CXBMCRenderManager::PreInit()
+     m_pRenderer = new CLinuxRendererGL();
+ #elif defined(HAS_MMAL)
+     m_pRenderer = new CMMALRenderer();
++#elif defined(HAS_MARVELL_DOVE)
++    m_pRenderer = new CDoveOverlayRenderer();
+ #elif HAS_GLES == 2
+     m_pRenderer = new CLinuxRendererGLES();
+ #elif defined(HAS_DX)
+diff --git a/xbmc/cores/VideoRenderers/RenderManager.h b/xbmc/cores/VideoRenderers/RenderManager.h
+index 8843217..aa3c22d 100644
+--- a/xbmc/cores/VideoRenderers/RenderManager.h
++++ b/xbmc/cores/VideoRenderers/RenderManager.h
+@@ -46,6 +46,7 @@ class CMMALRenderer;
+ class CLinuxRenderer;
+ class CLinuxRendererGL;
+ class CLinuxRendererGLES;
++class CDoveOverlayRenderer;
+ 
+ class CXBMCRenderManager
+ {
+@@ -154,6 +155,8 @@ public:
+   CLinuxRendererGL    *m_pRenderer;
+ #elif defined(HAS_MMAL)
+   CMMALRenderer       *m_pRenderer;
++#elif defined(HAS_MARVELL_DOVE)
++  CDoveOverlayRenderer *m_pRenderer;
+ #elif HAS_GLES == 2
+   CLinuxRendererGLES  *m_pRenderer;
+ #elif defined(HAS_DX)
+-- 
+1.7.9.5
+

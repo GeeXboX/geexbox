@@ -5,6 +5,7 @@
 get_meta $1
 cd $PKG_BUILD_DIR
 
+TARGET_CFLAGS=$(echo "$TARGET_CFLAGS" | sed -e "s/-flto\\S*//")
 export "TARGET_CFLAGS=$TARGET_CFLAGS `pkg-config --cflags libbsd` -I$ROOT/$PKG_BUILD_DIR/include -DDEBUG_BUILD=0 -D_FILE_OFFSET_BITS=64 -D LINUX=1 -D BSD=1"
 
 setup_toolchain target
@@ -15,9 +16,13 @@ mkdir -p .install/sbin
 mkdir -p .install/usr/share/hfsprogs
 
 cp newfs_hfs.tproj/hfsbootdata.img .install/usr/share/hfsprogs/hfsbootdata
-cp newfs_hfs.tproj/newfs_hfs .install/sbin/mkfs.hfsplus
+
+cp newfs_hfs.tproj/newfs_hfs .install/sbin
 ln -sf newfs_hfs .install/sbin/mkfs.hfsplus
 ln -sf newfs_hfs .install/sbin/mkfs.hfs
+
 cp fsck_hfs.tproj/fsck_hfs .install/sbin
 ln -sf fsck_hfs .install/sbin/fsck.hfs
 ln -sf fsck_hfs .install/sbin/fsck.hfsplus
+
+strip_bins .install/sbin

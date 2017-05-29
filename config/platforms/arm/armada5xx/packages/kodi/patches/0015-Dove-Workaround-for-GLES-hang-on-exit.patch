@@ -1,0 +1,27 @@
+From d5301f2069c12fd5040428e7afae8e605f08ae15 Mon Sep 17 00:00:00 2001
+From: warped-rudi <r.ihle@s-t.de>
+Date: Thu, 16 Mar 2017 09:30:44 +0100
+Subject: [PATCH] Dove: Workaround for GLES hang on exit
+
+---
+ xbmc/xbmc.cpp |    5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/xbmc/xbmc.cpp b/xbmc/xbmc.cpp
+index 366e4b5..ce2b7d4 100644
+--- a/xbmc/xbmc.cpp
++++ b/xbmc/xbmc.cpp
+@@ -136,5 +136,10 @@ extern "C" int XBMC_Run(bool renderGUI)
+   g_RBP.Deinitialize();
+ #endif
+ 
++  // workaround for a bug in the Vivante gpu driver
++#if defined(TARGET_MARVELL_DOVE)
++  _exit(status);
++#else
+   return status;
++#endif
+ }
+-- 
+1.7.9.5
+

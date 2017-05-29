@@ -1,0 +1,131 @@
+From 7a858507f810f02d29edf5c7cf3048307dfdb096 Mon Sep 17 00:00:00 2001
+From: warped-rudi <r.ihle@s-t.de>
+Date: Thu, 16 Mar 2017 09:30:43 +0100
+Subject: [PATCH] Dove: Honour newly introduced options
+
+---
+ .../DVDCodecs/Video/DVDVideoCodecVMETA.cpp         |    4 ----
+ xbmc/guilib/GraphicContext.cpp                     |    8 +++++++-
+ xbmc/guilib/JpegHwDec.cpp                          |    2 --
+ xbmc/guilib/JpegHwDecVMETA.cpp                     |    5 +----
+ xbmc/settings/Settings.cpp                         |    4 ++++
+ xbmc/settings/Settings.h                           |    1 +
+ 6 files changed, 13 insertions(+), 11 deletions(-)
+
+diff --git a/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecVMETA.cpp b/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecVMETA.cpp
+index f490206..7fe43ec 100644
+--- a/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecVMETA.cpp
++++ b/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecVMETA.cpp
+@@ -109,11 +109,7 @@ CDVDVideoCodecVMETA::CDVDVideoCodecVMETA()
+   m_low_delay         = -1;
+   m_codec_species     = -1;
+ 
+-#if 0
+   DllLibVMETA::SetHardwareClock(CSettings::GetInstance().GetInt("videoscreen.vmeta_clk") == VMETA_CLK_667);
+-#else
+-  DllLibVMETA::SetHardwareClock(true);
+-#endif
+ }
+ 
+ 
+diff --git a/xbmc/guilib/GraphicContext.cpp b/xbmc/guilib/GraphicContext.cpp
+index b623ab4..e4b4f66 100644
+--- a/xbmc/guilib/GraphicContext.cpp
++++ b/xbmc/guilib/GraphicContext.cpp
+@@ -78,6 +78,12 @@ void CGraphicContext::OnSettingChanged(const CSetting *setting)
+     if (IsFullScreenRoot())
+       SetVideoResolution(GetVideoResolution(), true);
+   }
++#ifdef HAS_MARVELL_DOVE
++  else if (settingId == CSettings::SETTING_VIDEOSCREEN_GRAPHICS_SCALING)
++  {
++    SetVideoResolution(GetVideoResolution(), true);
++  }
++#endif
+ }
+ 
+ void CGraphicContext::SetOrigin(float x, float y)
+@@ -770,7 +776,7 @@ void CGraphicContext::SetResInfo(RESOLUTION res, const RESOLUTION_INFO& info)
+ #ifdef HAS_MARVELL_DOVE
+ GRAPHICS_SCALING CGraphicContext::getGraphicsScale()
+ {
+-  int value = -1; // g_guiSettings.GetInt("videoscreen.graphics_scaling");
++  int value = CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOSCREEN_GRAPHICS_SCALING);
+ 
+   return (value == -1) ? GR_SCALE_100 : (GRAPHICS_SCALING)value;
+ }
+diff --git a/xbmc/guilib/JpegHwDec.cpp b/xbmc/guilib/JpegHwDec.cpp
+index 823c544..ab08cd8 100644
+--- a/xbmc/guilib/JpegHwDec.cpp
++++ b/xbmc/guilib/JpegHwDec.cpp
+@@ -54,9 +54,7 @@ void CJpegHwDec::PrepareBuffer(unsigned int numBytes)
+ CJpegHwDec *CJpegHwDec::create()
+ {
+ #if defined(HAS_MARVELL_DOVE)
+-#if 0
+   if (CSettings::GetInstance().GetBool("videoscreen.use_hardware_jpeg"))
+-#endif
+   {
+     CJpegHwDec *d = new CJpegHwDecVMeta();
+ 
+diff --git a/xbmc/guilib/JpegHwDecVMETA.cpp b/xbmc/guilib/JpegHwDecVMETA.cpp
+index e4493f4..7f2acda 100644
+--- a/xbmc/guilib/JpegHwDecVMETA.cpp
++++ b/xbmc/guilib/JpegHwDecVMETA.cpp
+@@ -30,6 +30,7 @@
+ #include "filesystem/File.h"
+ #include "threads/SystemClock.h"
+ #include "settings/Settings.h"
++#include "guilib/Resolution.h"
+ 
+ #include "XBTF.h"
+ #include "JpegHwDecVMETA.h"
+@@ -364,11 +365,7 @@ bool CJpegHwDecVMeta::DecodePicture(unsigned int maxWidth,
+             __FUNCTION__, maxWidth, maxHeight, scaleDivider);
+ #endif
+ 
+-#if 0
+   DllLibVMETA::SetHardwareClock(CSettings::GetInstance().GetInt("videoscreen.vmeta_clk") == VMETA_CLK_667);
+-#else
+-  DllLibVMETA::SetHardwareClock(true);
+-#endif
+ 
+   do
+   {
+diff --git a/xbmc/settings/Settings.cpp b/xbmc/settings/Settings.cpp
+index 367f5a3..16d7b1e 100644
+--- a/xbmc/settings/Settings.cpp
++++ b/xbmc/settings/Settings.cpp
+@@ -337,6 +337,7 @@ const std::string CSettings::SETTING_VIDEOSCREEN_SCREEN = "videoscreen.screen";
+ const std::string CSettings::SETTING_VIDEOSCREEN_RESOLUTION = "videoscreen.resolution";
+ const std::string CSettings::SETTING_VIDEOSCREEN_SCREENMODE = "videoscreen.screenmode";
+ const std::string CSettings::SETTING_VIDEOSCREEN_FAKEFULLSCREEN = "videoscreen.fakefullscreen";
++const std::string CSettings::SETTING_VIDEOSCREEN_GRAPHICS_SCALING = "videoscreen.graphics_scaling";
+ const std::string CSettings::SETTING_VIDEOSCREEN_BLANKDISPLAYS = "videoscreen.blankdisplays";
+ const std::string CSettings::SETTING_VIDEOSCREEN_STEREOSCOPICMODE = "videoscreen.stereoscopicmode";
+ const std::string CSettings::SETTING_VIDEOSCREEN_PREFEREDSTEREOSCOPICMODE = "videoscreen.preferedstereoscopicmode";
+@@ -1102,6 +1103,9 @@ void CSettings::InitializeISettingCallbacks()
+ 
+   settingSet.clear();
+   settingSet.insert(CSettings::SETTING_VIDEOSCREEN_FAKEFULLSCREEN);
++#ifdef HAS_MARVELL_DOVE
++  settingSet.insert(CSettings::SETTING_VIDEOSCREEN_GRAPHICS_SCALING);
++#endif
+   m_settingsManager->RegisterCallback(&g_graphicsContext, settingSet);
+ 
+   settingSet.clear();
+diff --git a/xbmc/settings/Settings.h b/xbmc/settings/Settings.h
+index 55e150d..28f0a2b 100644
+--- a/xbmc/settings/Settings.h
++++ b/xbmc/settings/Settings.h
+@@ -293,6 +293,7 @@ public:
+   static const std::string SETTING_VIDEOSCREEN_RESOLUTION;
+   static const std::string SETTING_VIDEOSCREEN_SCREENMODE;
+   static const std::string SETTING_VIDEOSCREEN_FAKEFULLSCREEN;
++  static const std::string SETTING_VIDEOSCREEN_GRAPHICS_SCALING;
+   static const std::string SETTING_VIDEOSCREEN_BLANKDISPLAYS;
+   static const std::string SETTING_VIDEOSCREEN_STEREOSCOPICMODE;
+   static const std::string SETTING_VIDEOSCREEN_PREFEREDSTEREOSCOPICMODE;
+-- 
+1.7.9.5
+

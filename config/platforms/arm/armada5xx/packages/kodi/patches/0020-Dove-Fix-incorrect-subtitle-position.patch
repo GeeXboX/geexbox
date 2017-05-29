@@ -1,0 +1,45 @@
+From 764f8167e1e310035315c1a8870f73d157c05717 Mon Sep 17 00:00:00 2001
+From: warped-rudi <r.ihle@s-t.de>
+Date: Thu, 16 Mar 2017 09:30:45 +0100
+Subject: [PATCH] Dove: Fix incorrect subtitle position
+
+---
+ xbmc/cores/VideoRenderers/DoveOverlayRenderer.cpp |   11 +++--------
+ 1 file changed, 3 insertions(+), 8 deletions(-)
+
+diff --git a/xbmc/cores/VideoRenderers/DoveOverlayRenderer.cpp b/xbmc/cores/VideoRenderers/DoveOverlayRenderer.cpp
+index 42225e5..6ed069e 100644
+--- a/xbmc/cores/VideoRenderers/DoveOverlayRenderer.cpp
++++ b/xbmc/cores/VideoRenderers/DoveOverlayRenderer.cpp
+@@ -78,25 +78,20 @@ CDoveOverlayRenderer::~CDoveOverlayRenderer()
+ 
+ void CDoveOverlayRenderer::ManageDisplay(bool first)
+ {
+-  CRect view;
+   int interpolation = m_interpolation;
+   struct _sOvlySurface overlaySurface = m_overlaySurface;
+   const CDisplaySettings& dispInfo = CDisplaySettings::GetInstance();
+-  const RESOLUTION_INFO& resInfo = dispInfo.GetCurrentResolutionInfo();
+   const CVideoSettings& vidInfo = CMediaSettings::GetInstance().GetCurrentVideoSettings();
+ 
+-  view.x1 = (float)resInfo.Overscan.left;
+-  view.y1 = (float)resInfo.Overscan.top;
+-  view.x2 = (float)resInfo.Overscan.right;
+-  view.y2 = (float)resInfo.Overscan.bottom;
++  m_viewRect = g_graphicsContext.GetViewWindow();
+ 
+   m_sourceRect.x1 = 0.0;
+   m_sourceRect.y1 = 0.0;
+   m_sourceRect.x2 = (float)m_sourceWidth;
+   m_sourceRect.y2 = (float)m_sourceHeight;
+ 
+-  CalcNormalDisplayRect(view.x1, view.y1,
+-                        view.Width(), view.Height(),
++  CalcNormalDisplayRect(m_viewRect.x1, m_viewRect.y1,
++                        m_viewRect.Width(), m_viewRect.Height(),
+                         GetAspectRatio() * dispInfo.GetPixelRatio(),
+                         dispInfo.GetZoomAmount(), dispInfo.GetVerticalShift());
+ 
+-- 
+1.7.9.5
+

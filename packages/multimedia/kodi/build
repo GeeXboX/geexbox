@@ -27,7 +27,7 @@ kodi_set_option $1 "xvba"              "xvba"
 kodi_set_option $1 "vaapi"             "vaapi"
 kodi_set_option $1 "crystalhd"         "crystalhd"
 kodi_set_option $1 "pulse"             "pulse"
-kodi_set_option $1 "dvdcss"            "dvdcss"
+kodi_set_option $1 "dvdcss"            "dvdcss optical-drive"
 kodi_set_option $1 "bluray"            "libbluray"
 kodi_set_option $1 "rtmp"              "rtmp"
 kodi_set_option $1 "nonfree"           "non-free"
@@ -103,6 +103,11 @@ export PYTHON_EXTRA_LDFLAGS="-Xlinker -export-dynamic"
 
 #export ac_cv_path_JAVA_EXE="/usr/bin/java"
 
+# disable doxygen
+export ac_cv_path_DOXYGEN=""
+export ac_cv_path_DOXYGEN_EXE=none
+
+
 cd $PKG_BUILD_DIR
 
 touch .dummy.in
@@ -115,6 +120,7 @@ if [ ! -f configure ] ; then
 
   # build libsquish for target
   setup_toolchain target
+  do_gcc_strip_lto
   cd tools/depends/native/libsquish-native
   make NATIVEPLATFORM=target NATIVEPREFIX=$LIB_PREFIX
   cd -

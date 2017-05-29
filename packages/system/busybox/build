@@ -2,7 +2,9 @@
 
 . config/options
 
-cd $BUILD/$1*
+get_meta $1
+
+cd $PKG_BUILD_DIR
 export ARCH=$TARGET_ARCH
 export EXTRA_CFLAGS="$CFLAGS"
 export CROSS_COMPILE="$TARGET_PREFIX"
@@ -13,5 +15,8 @@ do_gcc_strip_gold
 make $1 HOSTCC="$HOST_CC"
 make install
 
-# already present with elfutils packages
+# already present with elfutils package
 rm _install/usr/bin/strings
+
+# already present with mtd-utils package
+rm _install/usr/sbin/ubirename
